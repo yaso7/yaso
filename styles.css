@@ -95,8 +95,8 @@ h2 .route{display:block;font:400 11px/1 var(--ff-mono);letter-spacing:.07em;colo
 /* ---------- hero: name first, verb line second ---------- */
 .hero{min-height:100svh;padding-top:calc(var(--pad) + 104px);padding-bottom:calc(var(--pad) + 84px);display:grid;align-content:end;gap:26px}
 .hero-meta{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-h1{margin:0;font-weight:800;font-size:clamp(52px,14.6vw,226px);line-height:.84;text-transform:uppercase;letter-spacing:-.005em}
-h1.long{font-size:clamp(34px,9.4vw,150px)}
+h1{margin:0;font-weight:800;font-size:clamp(40px,8.6vw,132px);line-height:.84;text-transform:uppercase;letter-spacing:-.005em}
+h1.long{font-size:clamp(30px,5.6vw,88px)}
 h1 .ln{display:block;white-space:nowrap;clip-path:inset(-4% -60vw -2% -60vw)}
 h1 .w{display:inline-block}
 h1 .ch{display:inline-block;font-variation-settings:"wdth" var(--w,62);will-change:font-variation-settings}
