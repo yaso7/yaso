@@ -14,9 +14,9 @@ const PHOTOS = {
   // One optional image per release, shown when the row is opened.
   releases: { 'v7.0': 'img/thesis-demo.jpg', 'v1.0': 'img/holooltech-game.jpg' }
 };
-// Contact form: paste a form-service endpoint (Formspree, Web3Forms, FormSubmit…).
-// Leave empty and the last step hands the request to the visitor's email app instead.
-const FORM = { endpoint: '', extra: {} };
+// Contact form: posts to the Vercel function in api/contact.js, which forwards to Telegram.
+// If the call fails (or this is empty), the last step offers a prefilled email instead.
+const FORM = { endpoint: '/api/contact', extra: {} };
 const MY_EMAIL = 'yusramalas@gmail.com';
 
 /* ---------- experience: releases (real work, real figures) ---------- */

@@ -306,7 +306,7 @@
     if (FORM.endpoint) {
       try {
         const res = await fetch(FORM.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ email, needs: needs.join(', '), _subject: `Portfolio request: ${needs.join(', ')}`, ...FORM.extra }) });
+          body: JSON.stringify({ email, needs: needs.join(', '), website: $('#reqhp').value, _subject: `Portfolio request: ${needs.join(', ')}`, ...FORM.extra }) });
         sent = res.ok;
       } catch { sent = false; }
     }

@@ -403,3 +403,5 @@ html.has-cursor .cursor{display:block}
   .flow-steps li{font-size:9.5px;letter-spacing:.04em;white-space:nowrap}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.001ms!important}}
+/* spam trap: off-screen, never visible or focusable for people */
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
