@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en" data-view="sheet">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lina Haddad — Contact Sheet</title>
+<meta name="description" content="Street photographs from Beirut by Lina Haddad. Twelve rolls, 2022–2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://picsum.photos">
+<link rel="preconnect" href="https://fastly.picsum.photos" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400&family=Schibsted+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------- reset ---------- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+img,svg,canvas{display:block;max-width:100%;-webkit-user-drag:none}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+ul,ol{list-style:none}
+
+/* ---------- tokens ---------- */
+:root{
+  --c-paper:#e8e4dc;           /* fibre paper — page, darkroom text */
+  --c-ink:#121110;             /* film base, darkroom */
+  --c-pencil:#ff3b1f;          /* grease pencil + safelight — the only non-photo colour */
+  --c-sub:rgb(18 17 16 / .52); /* hairlines, secondary labels */
+
+  --ff-display:"Gloock","Times New Roman",serif;
+  --ff-text:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --ff-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --ff-ar:"IBM Plex Sans Arabic",sans-serif;
+
+  --pad:max(16px,3.5vmin);
+  --ease:cubic-bezier(.3,.1,.1,1);
+  --ease-expo:cubic-bezier(.16,1,.3,1);
+
+  /* film geometry: one frame is 3:2 */
+  --fw:min(62dvh,54vw);
+  --fh:calc(var(--fw) / 1.5);
+  --gap:calc(var(--fw) * .045);
+  --reb:calc(var(--fw) * .085);
+}
+body{
+  background:var(--c-paper);color:var(--c-ink);
+  font:400 12px/1.4 var(--ff-text);
+  font-feature-settings:"palt";font-synthesis:none;-webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:1px solid var(--c-pencil);outline-offset:4px}
+.mono{font-family:var(--ff-mono);font-size:10px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ---------- viewport frame + corners ---------- */
+.frame{position:fixed;inset:var(--pad);border:1px solid var(--c-sub);pointer-events:none;z-index:5;
+  opacity:0;transform:scale(1.025);transition:opacity 1s var(--ease-expo),transform 1.2s var(--ease-expo)}
+html.is-in .frame{opacity:1;transform:none}
+.corner{position:fixed;z-index:6;opacity:0;transform:translateY(6px);transition:opacity .8s var(--ease-expo),transform .8s var(--ease-expo)}
+html.is-in .corner{opacity:1;transform:none}
+.corner--tl{top:calc(var(--pad) + 14px);left:calc(var(--pad) + 16px);transition-delay:.15s}
+.corner--tr{top:calc(var(--pad) + 14px);right:calc(var(--pad) + 16px);text-align:right;transition-delay:.2s}
+.corner--bl{bottom:calc(var(--pad) + 14px);left:calc(var(--pad) + 16px);transition-delay:.25s}
+.corner--br{bottom:calc(var(--pad) + 14px);right:calc(var(--pad) + 16px);text-align:right;transition-delay:.3s}
+
+.name{display:flex;align-items:baseline;gap:10px;font:400 18px/1 var(--ff-display);letter-spacing:-.01em}
+.name [lang="ar"]{font:400 13px/1 var(--ff-ar);color:var(--c-sub);letter-spacing:0}
+.role{display:block;margin-top:7px;color:var(--c-sub)}
+.clock{display:block}
+.coords{display:block;margin-top:5px;color:var(--c-sub)}
+
+.nav{display:flex;gap:16px}
+.nav button{position:relative;color:var(--c-sub);transition:color .25s var(--ease)}
+.nav button:hover,.nav button[aria-pressed="true"]{color:var(--c-ink)}
+.nav button[aria-pressed="true"]::before{content:"●";position:absolute;right:calc(100% + 4px);color:var(--c-pencil);font-size:7px;top:2px}
+
+.counter{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.counter__bar{position:relative;width:72px;height:1px;background:var(--c-sub);overflow:hidden}
+.counter__bar i{position:absolute;inset:0;background:var(--c-ink);transform-origin:left;transform:scaleX(.083);transition:transform .6s var(--ease-expo)}
+.counter__n{font-variant-numeric:tabular-nums;min-width:12ch}
+.hint{display:block;margin-top:6px;color:var(--c-sub)}
+
+/* ---------- contact sheet ---------- */
+.sheet{position:fixed;inset:0;z-index:1;display:grid;align-content:center;justify-items:center;
+  padding-bottom:2dvh;transition:opacity .5s var(--ease),transform .7s var(--ease-expo),visibility 0s}
+html:not([data-view="sheet"]) .sheet{opacity:0;transform:translateY(-2.5dvh);visibility:hidden;transition:opacity .35s var(--ease),transform .5s var(--ease),visibility 0s .5s}
+.strip-wrap{width:100vw;overflow:hidden;padding-block:calc(var(--fh) * .12);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.strip{display:flex;width:max-content;will-change:transform}
+.strip::before,.strip::after{content:"";flex:none;width:calc(50vw - (var(--fw) + var(--gap)) / 2)}
+
+.roll{flex:none;position:relative;width:calc(var(--fw) + var(--gap));height:calc(var(--fh) + 2 * var(--reb));background:var(--c-ink)}
+.roll:first-child{border-radius:2px 0 0 2px}
+/* sprocket holes — 8 per frame, paper shows through */
+.roll::before,.roll::after{content:"";position:absolute;left:0;right:0;height:calc(var(--reb) * .36);background:var(--c-paper);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10' preserveAspectRatio='none'%3E%3Crect x='6' y='0' width='8' height='10' rx='1.8'/%3E%3C/svg%3E") 0 0 / calc((var(--fw) + var(--gap)) / 8) 100% repeat-x;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10' preserveAspectRatio='none'%3E%3Crect x='6' y='0' width='8' height='10' rx='1.8'/%3E%3C/svg%3E") 0 0 / calc((var(--fw) + var(--gap)) / 8) 100% repeat-x}
+.roll::before{top:calc(var(--reb) * .38)}
+.roll::after{bottom:calc(var(--reb) * .38)}
+.roll__edge{position:absolute;left:calc(var(--gap) / 2);font:500 max(7px,calc(var(--reb) * .2))/1 var(--ff-mono);letter-spacing:.14em;color:rgb(232 228 220 / .5);white-space:nowrap;pointer-events:none}
+.roll__edge--t{top:calc(var(--reb) * .1)}
+.roll__edge--b{bottom:calc(var(--reb) * .1)}
+.roll__dot{color:var(--c-pencil);font-weight:500;opacity:0;transition:opacity .3s}
+.roll.is-current .roll__dot{opacity:1}
+
+.roll__frame{position:absolute;left:calc(var(--gap) / 2);top:var(--reb);width:var(--fw);height:var(--fh);overflow:hidden;background:#000;
+  clip-path:inset(0 100% 0 0);transition:clip-path 1.1s var(--ease-expo) calc(var(--i) * 55ms + 250ms)}
+html.is-in .roll__frame{clip-path:inset(0 0 0 0)}
+.roll__frame img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.08) brightness(.97);
+  transition:filter .5s var(--ease),transform .9s var(--ease-expo)}
+.roll.is-current .roll__frame img{filter:none}
+
+.roll__loop{position:absolute;z-index:3;pointer-events:none;overflow:visible;
+  left:calc(var(--gap) / 2 - var(--fw) * .12);top:calc(var(--reb) - var(--fh) * .12);width:calc(var(--fw) * 1.24);height:calc(var(--fh) * 1.24)}
+.roll__loop path{fill:none;stroke:var(--c-pencil);stroke-width:.8;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset .35s var(--ease),opacity .15s .2s}
+
+@media (hover:hover) and (pointer:fine){
+  .roll:hover{z-index:2}
+  .roll:hover .roll__frame img{filter:none;transform:scale(1.035)}
+  .roll:hover .roll__loop path{stroke-dashoffset:0;opacity:1;transition:stroke-dashoffset .75s var(--ease-expo),opacity .05s}
+}
+
+.caption{margin-top:1.2dvh;text-align:center;display:grid;justify-items:center;gap:10px;min-height:76px}
+.caption__no{color:var(--c-sub)}
+.caption__title{font:400 clamp(22px,2.5vw,36px)/1 var(--ff-display);letter-spacing:-.015em;overflow:hidden;padding-bottom:.08em}
+.caption__title span{display:inline-block}
+.caption__meta{color:var(--c-sub)}
+
+/* ---------- index + info views ---------- */
+.view{position:fixed;z-index:2;inset:calc(var(--pad) + 64px) calc(var(--pad) + 16px) calc(var(--pad) + 56px);
+  opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility 0s .35s}
+html[data-view="index"] .view--index,html[data-view="info"] .view--info{opacity:1;visibility:visible;transition:opacity .6s var(--ease) .15s,visibility 0s}
+.view--index{overflow:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 24px,#000 calc(100% - 40px),transparent);
+          mask-image:linear-gradient(to bottom,transparent,#000 24px,#000 calc(100% - 40px),transparent)}
+.view--index::-webkit-scrollbar{display:none}
+.index__head{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--c-sub);color:var(--c-sub)}
+.row{display:grid;grid-template-columns:6ch 1fr 20ch 6ch;align-items:baseline;gap:16px;width:100%;padding:14px 0 12px;border-bottom:1px solid var(--c-sub);transition:opacity .3s var(--ease)}
+.index__list:hover .row{opacity:.2}
+.index__list .row:hover,.index__list .row:focus-visible{opacity:1}
+.row__t{font:400 clamp(26px,4.6vw,64px)/1 var(--ff-display);letter-spacing:-.02em;transition:transform .45s var(--ease-expo),color .3s}
+.row:hover .row__t{transform:translateX(14px);color:var(--c-pencil)}
+.row__p,.row__no{color:var(--c-sub)}
+.row__y{text-align:right}
+.row__thumb{display:none}
+
+.preview{position:fixed;left:0;top:0;z-index:8;width:min(24vw,340px);aspect-ratio:3/2;pointer-events:none;opacity:0;transition:opacity .25s var(--ease);background:var(--c-ink);padding:6px}
+.preview.is-on{opacity:1}
+.preview img{width:100%;height:100%;object-fit:cover}
+
+.view--info{display:grid;align-content:end;gap:28px;max-width:560px}
+.info__lede{font:400 clamp(22px,2.4vw,32px)/1.15 var(--ff-display);letter-spacing:-.01em}
+.info__lede [lang="ar"]{font-family:var(--ff-ar);font-size:.8em}
+.info__rows{display:grid;gap:0;border-top:1px solid var(--c-sub)}
+.info__rows p{display:grid;grid-template-columns:16ch 1fr;padding:11px 0;border-bottom:1px solid var(--c-sub);font-size:12px;line-height:1.3}
+.info__rows p span:first-child{color:var(--c-sub)}
+.info__rows a{background:linear-gradient(var(--c-pencil),var(--c-pencil)) 0 100% / 0 1px no-repeat;transition:background-size .4s var(--ease-expo)}
+.info__rows a:hover{background-size:100% 1px}
+
+/* ---------- darkroom viewer ---------- */
+.viewer{position:fixed;inset:0;z-index:50;background:var(--c-ink);color:var(--c-paper);visibility:hidden;transition:color .6s var(--ease)}
+.viewer.is-open{visibility:visible}
+.viewer.is-safelight{color:var(--c-pencil)}
+.viewer .gl{position:absolute;inset:0;width:100%;height:100%}
+.viewer__img{position:absolute;top:var(--vt,80px);bottom:var(--vb,100px);left:var(--vx,40px);right:var(--vx,40px);width:calc(100% - 2 * var(--vx,40px));height:calc(100% - var(--vt,80px) - var(--vb,100px));max-width:none;object-fit:contain;opacity:0;pointer-events:none}
+.viewer.no-gl .viewer__img,.viewer.gl-miss .viewer__img{opacity:1;filter:sepia(1) saturate(4) hue-rotate(-28deg) brightness(.35) contrast(.8);transition:none}
+.viewer.no-gl .viewer__img.is-dev,.viewer.gl-miss .viewer__img.is-dev{filter:none;transition:filter var(--dev,1.4s) var(--ease)}
+.viewer__half{position:absolute;top:0;bottom:0;width:50%;z-index:1}
+.viewer__half--prev{left:0}.viewer__half--next{right:0}
+.viewer__ui{position:absolute;z-index:2}
+.viewer__tl{top:calc(var(--pad) + 14px);left:calc(var(--pad) + 16px);display:grid;gap:8px}
+.viewer__title{font:400 22px/1 var(--ff-display);letter-spacing:-.01em;overflow:hidden;padding-bottom:.08em}
+.viewer__title span{display:inline-block}
+.viewer__meta{opacity:.6}
+.viewer__tr{top:calc(var(--pad) + 14px);right:calc(var(--pad) + 16px);display:flex;gap:22px;align-items:center}
+.safelight{opacity:.75}
+.close{position:relative}
+.close::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease-expo)}
+.close:hover::after{transform:scaleX(1);transform-origin:left}
+.viewer__bl{bottom:calc(var(--pad) + 14px);left:calc(var(--pad) + 16px);font-variant-numeric:tabular-nums}
+.viewer__br{bottom:calc(var(--pad) + 14px);right:calc(var(--pad) + 16px)}
+.viewer__br button{transition:opacity .25s}.viewer__br button:hover{opacity:.6}
+.thumbs{bottom:calc(var(--pad) + 10px);left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.thumbs button{position:relative;width:54px;aspect-ratio:3/2;background:#000;transition:transform .3s var(--ease-expo)}
+.thumbs img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.75);transition:filter .3s var(--ease)}
+.thumbs button:hover{transform:translateY(-3px)}
+.thumbs button:hover img,.thumbs button[aria-current="true"] img{filter:none}
+.thumbs button[aria-current="true"]::before{content:"";position:absolute;left:50%;top:-9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--c-pencil)}
+
+/* ---------- viewfinder cursor ---------- */
+html.has-cursor,html.has-cursor *{cursor:none!important}
+.vf{position:fixed;left:0;top:0;z-index:200;pointer-events:none;mix-blend-mode:difference;color:#fff;--w:22px;--h:15px;--s:1;--c:5px;transition:opacity .25s}
+.vf.is-away{opacity:0}
+.vf.is-link{--w:34px;--h:23px}
+.vf.is-frame{--w:84px;--h:56px;--c:10px}
+.vf.is-down{--s:.82}
+.vf__box{position:absolute;left:0;top:0;width:var(--w);height:var(--h);transform:translate(-50%,-50%) scale(var(--s));
+  transition:width .5s var(--ease-expo),height .5s var(--ease-expo),transform .2s var(--ease)}
+.vf__box i{position:absolute;width:var(--c);height:var(--c);border:0 solid currentColor;transition:width .5s var(--ease-expo),height .5s var(--ease-expo)}
+.vf__box i:nth-child(1){left:0;top:0;border-left-width:1px;border-top-width:1px}
+.vf__box i:nth-child(2){right:0;top:0;border-right-width:1px;border-top-width:1px}
+.vf__box i:nth-child(3){left:0;bottom:0;border-left-width:1px;border-bottom-width:1px}
+.vf__box i:nth-child(4){right:0;bottom:0;border-right-width:1px;border-bottom-width:1px}
+.vf__dot{position:absolute;left:-1.5px;top:-1.5px;width:3px;height:3px;border-radius:50%;background:currentColor}
+.vf__label{position:absolute;left:0;top:calc(var(--h) / 2 + 9px);transform:translateX(-50%);white-space:nowrap;font:500 9px/1 var(--ff-mono);letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity .2s,top .5s var(--ease-expo)}
+.vf.has-label .vf__label{opacity:1}
+
+/* ---------- loader ---------- */
+.loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--c-ink);color:var(--c-paper);
+  clip-path:inset(0 0 0 0);transition:clip-path .9s var(--ease-expo)}
+.loader.is-done{clip-path:inset(0 0 100% 0)}
+.loader__inner{display:grid;gap:16px;width:min(360px,74vw)}
+.loader__holes{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+.loader__holes i{aspect-ratio:2/3;border:1px solid rgb(232 228 220 / .35);border-radius:2px;transition:background-color .3s var(--ease),border-color .3s}
+.loader__holes i.is-on{background:var(--c-paper);border-color:var(--c-paper)}
+.loader__row{display:flex;justify-content:space-between;align-items:baseline}
+.loader__name{font:500 12px/1 var(--ff-mono);letter-spacing:.24em}
+.loader__count{color:rgb(232 228 220 / .5);font-variant-numeric:tabular-nums}
+.loader__note{color:rgb(232 228 220 / .5)}
+
+/* ---------- touch ---------- */
+html.is-touch .strip-wrap{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;touch-action:auto;-webkit-overflow-scrolling:touch}
+html.is-touch .strip-wrap::-webkit-scrollbar{display:none}
+html.is-touch .roll{scroll-snap-align:center}
+html.is-touch .roll.is-current .roll__loop path{stroke-dashoffset:0;opacity:1;transition:stroke-dashoffset .75s var(--ease-expo) .1s,opacity .05s .1s}
+html.is-touch .vf,html.is-touch .preview{display:none}
+
+@media (max-width:700px){
+  :root{--fw:78vw}
+  .name{font-size:16px}
+  .role{display:none}
+  .coords{display:none}
+  .nav{gap:14px}
+  .counter__bar{width:40px}
+  .caption{margin-top:3dvh}
+  .row{grid-template-columns:3ch 64px 1fr;grid-template-rows:auto auto;row-gap:6px;align-items:center}
+  .row__thumb{display:block;grid-row:1 / span 2;grid-column:2;width:64px;aspect-ratio:3/2;object-fit:cover}
+  .row__no{grid-row:1 / span 2;grid-column:1}
+  .row__t{grid-column:3;grid-row:1;font-size:24px}
+  .row__p{grid-column:3;grid-row:2}
+  .row__y{display:none}
+  .info__rows p{grid-template-columns:11ch 1fr}
+  .thumbs{bottom:calc(var(--pad) + 40px)}
+  .thumbs button{width:44px}
+  .viewer__title{font-size:18px}
+  .safelight{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms!important;transition-delay:0s!important;animation-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="frame" aria-hidden="true"></div>
+
+  <header class="corner corner--tl">
+    <a href="#" class="name" data-home data-cursor="Sheet"><span>Lina Haddad</span><span lang="ar" dir="rtl">لينا حداد</span></a>
+    <span class="mono role">( Street photographs )</span>
+  </header>
+
+  <div class="corner corner--tr mono">
+    <span class="clock" aria-label="Time in Beirut">Beirut --:--:--</span>
+    <span class="coords">33.89°N 35.50°E</span>
+  </div>
+
+  <nav class="corner corner--bl mono nav" aria-label="Views">
+    <button data-view-btn="sheet" aria-pressed="true" data-cursor="S">Sheet</button>
+    <button data-view-btn="index" aria-pressed="false" data-cursor="I">Index</button>
+    <button data-view-btn="info" aria-pressed="false" data-cursor="Info">Info</button>
+  </nav>
+
+  <div class="corner corner--br mono">
+    <div class="counter"><span class="counter__bar" aria-hidden="true"><i></i></span><span class="counter__n" aria-live="polite">Roll 01 / 12</span></div>
+    <span class="hint">( Scroll / Drag ) ⟷</span>
+  </div>
+
+  <main class="sheet" aria-label="Contact sheet">
+    <h1 class="sr">Lina Haddad, street photographs, Beirut</h1>
+    <div class="strip-wrap">
+      <ol class="strip" aria-label="Twelve projects"></ol>
+    </div>
+    <div class="caption">
+      <span class="mono caption__no">( 01 )</span>
+      <h2 class="caption__title"><span></span></h2>
+      <p class="mono caption__meta"></p>
+    </div>
+  </main>
+
+  <section class="view view--index" aria-label="Index">
+    <div class="index__head mono"><span>Index</span><span>12 Rolls · 72 Frames</span></div>
+    <ul class="index__list"></ul>
+    <div style="height:12dvh"></div>
+  </section>
+
+  <section class="view view--info" aria-label="Info">
+    <p class="info__lede">Lina Haddad <span lang="ar" dir="rtl">لينا حداد</span><br>walks Beirut with one camera,<br>mostly before seven in the morning.</p>
+    <div class="info__rows">
+      <!-- placeholder contact details: replace -->
+      <p><span class="mono">Commissions</span><span><a href="mailto:hello@linahaddad.com" data-cursor="Mail">hello@linahaddad.com</a></span></p>
+      <p><span class="mono">Instagram</span><span><a href="https://instagram.com/" target="_blank" rel="noopener" data-cursor="Open">@linahaddad</a></span></p>
+      <p><span class="mono">Based</span><span>Beirut, Lebanon</span></p>
+      <p><span class="mono">Archive</span><span>12 rolls, 2022 – 2026</span></p>
+    </div>
+  </section>
+</div>
+
+<div class="preview" aria-hidden="true"><img alt="" crossorigin="anonymous"></div>
+
+<section class="viewer no-gl" role="dialog" aria-modal="true" aria-labelledby="vTitle" inert>
+  <canvas class="gl" aria-hidden="true"></canvas>
+  <img class="viewer__img" alt="" crossorigin="anonymous">
+  <button class="viewer__half viewer__half--prev" aria-label="Previous photograph" data-cursor="Prev"></button>
+  <button class="viewer__half viewer__half--next" aria-label="Next photograph" data-cursor="Next"></button>
+  <div class="viewer__ui viewer__tl">
+    <span class="mono viewer__no">( 01 / 12 )</span>
+    <h2 class="viewer__title" id="vTitle"><span></span></h2>
+    <span class="mono viewer__meta"></span>
+  </div>
+  <div class="viewer__ui viewer__tr mono">
+    <span class="safelight" aria-hidden="true">● Safelight</span>
+    <button class="close" data-cursor="Close">Close [ Esc ]</button>
+  </div>
+  <nav class="viewer__ui thumbs" aria-label="Frames on this roll"></nav>
+  <div class="viewer__ui viewer__bl mono"><span class="viewer__frame">Frame 01 / 06</span></div>
+  <div class="viewer__ui viewer__br mono"><button class="next-roll" data-cursor="Next roll">Next roll ▸ 02</button></div>
+</section>
+
+<div class="vf is-away" aria-hidden="true"><div class="vf__box"><i></i><i></i><i></i><i></i></div><span class="vf__dot"></span><span class="vf__label"></span></div>
+
+<div class="loader" aria-hidden="true">
+  <div class="loader__inner">
+    <div class="loader__holes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="loader__row"><span class="loader__name">LINA HADDAD</span><span class="mono loader__count">00 / 12</span></div>
+    <span class="mono loader__note">Loading film — Beirut</span>
+  </div>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"}}</script>
+<script type="module">
+/* ============================================================
+   Data — 12 rolls × 6 frames. Placeholder photos from picsum,
+   seeded so each roll always shows the same pictures.
+   o = orientation of each frame (L landscape / P portrait).
+   ============================================================ */
+const ROLLS = [
+  { t:'Generator Hours',       p:'Hamra',            y:2026, o:'LLPLPL' },
+  { t:'Corniche, 6 a.m.',      p:'Ain el-Mreisseh',  y:2025, o:'LPLLPL' },
+  { t:'The Stairs',            p:'Mar Mikhael',      y:2025, o:'LPPLLP' },
+  { t:'Hand-painted Signs',    p:'Bourj Hammoud',    y:2025, o:'LLLPLP' },
+  { t:'Sabra Market',          p:'Sabra',            y:2024, o:'LPLPLL' },
+  { t:'After Rain',            p:'Gemmayzeh',        y:2024, o:'LLPPLL' },
+  { t:'Swimmers',              p:'Raouché',          y:2024, o:'LPLLLP' },
+  { t:'Service',               p:'Cola',             y:2023, o:'LLPLLP' },
+  { t:'Barbers',               p:'Badaro',           y:2023, o:'LPPLPL' },
+  { t:'Balconies',             p:'Achrafieh',        y:2023, o:'LPLPPL' },
+  { t:'Fishermen',             p:'Dalieh',           y:2022, o:'LLPLPP' },
+  { t:'Night Shift',           p:'Downtown',         y:2022, o:'LPLLPL' },
+];
+const N = ROLLS.length, FR = 6;
+const p2 = n => String(n).padStart(2, '0');
+const pic = (r, k, w, h) => `https://picsum.photos/seed/lina-haddad-${p2(r + 1)}-${k}/${w}/${h}`;
+const photoURL = (r, k) => ROLLS[r].o[k] === 'L' ? pic(r, k, 1800, 1200) : pic(r, k, 1200, 1800);
+const coverURL = (r, w = 900) => pic(r, 0, w, Math.round(w / 1.5));
+
+const root = document.documentElement;
+const $ = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const touchMQ = matchMedia('(hover: none), (pointer: coarse)');
+let isTouch = touchMQ.matches;
+root.classList.toggle('is-touch', isTouch);
+const EXPO = 'cubic-bezier(.16,1,.3,1)';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- shared pointer ---------- */
+const P = { x: innerWidth / 2, y: innerHeight / 2, vx: 0, vy: 0 };
+addEventListener('pointermove', e => { P.vx = e.clientX - P.x; P.vy = e.clientY - P.y; P.x = e.clientX; P.y = e.clientY; }, { passive: true });
+
+/* ---------- scramble (labels, loader) ---------- */
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/—·';
+function scramble(el, final, dur = 450) {
+  if (reduce) { el.textContent = final; return; }
+  const t0 = performance.now(); el.dataset.final = final;
+  (function f(now) {
+    if (el.dataset.final !== final) return;
+    const p = Math.min(1, (now - t0) / dur), n = Math.floor(p * final.length);
+    el.textContent = [...final].map((c, i) => i < n || c === ' ' ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join('');
+    if (p < 1) requestAnimationFrame(f);
+  })(t0);
+}
+function slideText(wrap, text) {          // title change: new line rises from a mask
+  wrap.innerHTML = ''; const s = document.createElement('span'); s.textContent = text; wrap.append(s);
+  if (!reduce) s.animate([{ transform: 'translateY(105%)' }, { transform: 'none' }], { duration: 700, easing: EXPO });
+}
+
+/* ---------- grease-pencil loop: a wobbly, overshooting ellipse, seeded per roll ---------- */
+function loopPath(seed) {
+  let s = (seed + 1) * 7919;
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const a0 = -Math.PI * (.5 + rnd() * .35), turns = 1.1 + rnd() * .07, f1 = rnd() * 6.28, f2 = rnd() * 6.28, n = 80;
+  let d = '';
+  for (let j = 0; j <= n; j++) {
+    const t = j / n, a = a0 + t * turns * Math.PI * 2;
+    const w = 1 + .03 * Math.sin(a * 3 + f1) + .018 * Math.sin(a * 5 + f2) + t * .05;
+    d += (j ? 'L' : 'M') + (75 + Math.cos(a) * 83 * w).toFixed(1) + ' ' + (50 + Math.sin(a) * 57 * w).toFixed(1);
+  }
+  return d;
+}
+
+/* ---------- build the contact sheet, index, loader count ---------- */
+const strip = $('.strip'), wrap = $('.strip-wrap');
+ROLLS.forEach((r, i) => {
+  const li = document.createElement('li');
+  li.className = 'roll'; li.style.setProperty('--i', i); li.dataset.i = i;
+  li.innerHTML = `
+    <span class="roll__edge roll__edge--t" aria-hidden="true"><b class="roll__dot">●</b> ${p2(i + 1)} ▸ LH 400 &nbsp; ${r.p.toUpperCase()}</span>
+    <span class="roll__edge roll__edge--b" aria-hidden="true">${p2(i + 1)}A &nbsp;▸&nbsp; ${r.y} &nbsp; ${FR} EXP</span>
+    <button class="roll__frame" data-cursor="Open ${p2(i + 1)}" aria-label="Open ${r.t} — ${r.p}, ${r.y}">
+      <img src="${coverURL(i)}" alt="" crossorigin="anonymous" draggable="false" decoding="async">
+    </button>
+    <svg class="roll__loop" viewBox="-18 -12 186 124" aria-hidden="true"><path pathLength="1" d="${loopPath(i)}"/></svg>`;
+  strip.append(li);
+});
+const rolls = $$('.roll');
+
+const list = $('.index__list');
+ROLLS.forEach((r, i) => {
+  const li = document.createElement('li');
+  li.innerHTML = `<button class="row" data-i="${i}" data-cursor="Open">
+      <span class="mono row__no">${p2(i + 1)}</span>
+      <img class="row__thumb" src="${coverURL(i, 240)}" alt="" crossorigin="anonymous" loading="lazy">
+      <span class="row__t">${r.t}</span>
+      <span class="mono row__p">${r.p}</span>
+      <span class="mono row__y">${r.y}</span>
+    </button>`;
+  list.append(li);
+});
+
+/* ---------- clock (Beirut) ---------- */
+const clockEl = $('.clock');
+let fmt; try { fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Beirut', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); } catch { fmt = null; }
+const tickClock = () => clockEl.textContent = 'Beirut ' + (fmt ? fmt.format(new Date()) : new Date().toLocaleTimeString('en-GB'));
+tickClock(); setInterval(tickClock, 1000);
+
+/* ============================================================
+   Contact sheet: film strip
+   ============================================================ */
+const S = { x: 0, tx: 0, skew: 0, step: 1, cur: -1, drag: null, lastInput: 0, ready: false, dragged: false };
+const capNo = $('.caption__no'), capTitle = $('.caption__title'), capMeta = $('.caption__meta');
+const counterN = $('.counter__n'), counterBar = $('.counter__bar i');
+
+function measure() { S.step = rolls[0].offsetWidth || 1; }
+function setCurrent(i) {
+  i = clamp(i, 0, N - 1);
+  if (i === S.cur) return;
+  S.cur = i;
+  rolls.forEach((r, j) => r.classList.toggle('is-current', j === i));
+  const r = ROLLS[i];
+  capNo.textContent = `( ${p2(i + 1)} )`;
+  slideText(capTitle, r.t);
+  scramble(capMeta, `${r.p} — ${r.y} — ${p2(FR)} frames`.toUpperCase());
+  counterN.textContent = `Roll ${p2(i + 1)} / ${N}`;
+  counterBar.style.transform = `scaleX(${(i + 1) / N})`;
+}
+function goTo(i, instant = false) {
+  i = clamp(i, 0, N - 1);
+  if (isTouch) wrap.scrollTo({ left: i * S.step, behavior: instant || reduce ? 'auto' : 'smooth' });
+  else { S.tx = i * S.step; if (instant) S.x = S.tx; S.lastInput = performance.now(); }
+  if (instant) setCurrent(i);
+}
+const maxX = () => (N - 1) * S.step;
+
+// wheel → film advance (desktop)
+addEventListener('wheel', e => {
+  if (isTouch) return;
+  if (V.open) { viewerWheel(e); return; }
+  if (root.dataset.view !== 'sheet' || !S.ready) return;
+  const k = e.deltaMode === 1 ? 32 : 1;
+  S.tx = clamp(S.tx + (e.deltaY + e.deltaX) * k, 0, maxX());
+  S.lastInput = performance.now();
+}, { passive: true });
+
+// drag (mouse / pen) → film advance
+wrap.addEventListener('pointerdown', e => {
+  if (isTouch || e.pointerType === 'touch' || e.button !== 0) return;
+  S.drag = { x: e.clientX, tx: S.tx, moved: false, id: e.pointerId };
+});
+addEventListener('pointermove', e => {
+  if (!S.drag) return;
+  const dx = e.clientX - S.drag.x;
+  if (Math.abs(dx) > 5) S.drag.moved = true;
+  S.tx = clamp(S.drag.tx - dx * 1.3, -S.step * .25, maxX() + S.step * .25);
+  S.lastInput = performance.now();
+});
+addEventListener('pointerup', () => {
+  if (!S.drag) return;
+  S.dragged = S.drag.moved; S.drag = null;
+  S.tx = clamp(S.tx, 0, maxX());
+  setTimeout(() => S.dragged = false, 0);
+});
+
+// touch: native scroll-snap; current = nearest centred
+wrap.addEventListener('scroll', () => { if (isTouch) setCurrent(Math.round(wrap.scrollLeft / S.step)); }, { passive: true });
+
+// open from the sheet
+strip.addEventListener('click', e => {
+  const b = e.target.closest('.roll__frame'); if (!b || S.dragged) return;
+  const i = +b.closest('.roll').dataset.i;
+  openRoll(i, 0, b);
+});
+// keyboard focus moves the film
+strip.addEventListener('focusin', e => {
+  const b = e.target.closest('.roll__frame');
+  if (b && b.matches(':focus-visible')) goTo(+b.closest('.roll').dataset.i);
+});
+
+function tickStrip(now) {
+  if (isTouch) return;
+  const prevX = S.x;
+  if (S.ready) {
+    if (!S.drag && now - S.lastInput > 160) S.tx = clamp(Math.round(S.tx / S.step), 0, N - 1) * S.step;   // wind to the nearest frame
+    S.x += (S.tx - S.x) * (reduce ? 1 : .1);
+  }
+  const v = S.x - prevX;
+  S.skew += (clamp(-v * .07, -4, 4) - S.skew) * .15;
+  if (reduce) S.skew = 0;
+  strip.style.transform = `translate3d(${(-S.x).toFixed(2)}px,0,0) skewX(${S.skew.toFixed(3)}deg)`;
+  if (S.ready) setCurrent(Math.round(S.x / S.step));
+}
+
+/* ============================================================
+   Views: sheet / index / info
+   ============================================================ */
+const sheet = $('.sheet'), viewIndex = $('.view--index'), viewInfo = $('.view--info');
+function setView(v) {
+  root.dataset.view = v;
+  $$('[data-view-btn]').forEach(b => b.setAttribute('aria-pressed', b.dataset.viewBtn === v));
+  sheet.inert = v !== 'sheet'; viewIndex.inert = v !== 'index'; viewInfo.inert = v !== 'info';
+  preview.classList.remove('is-on');
+}
+$$('[data-view-btn]').forEach(b => b.addEventListener('click', () => setView(b.dataset.viewBtn)));
+$('[data-home]').addEventListener('click', e => { e.preventDefault(); setView('sheet'); goTo(0); });
+
+// index: hover preview + open
+const preview = $('.preview'), previewImg = $('img', preview);
+let pvx = P.x, pvy = P.y;
+list.addEventListener('pointerover', e => {
+  const row = e.target.closest('.row'); if (!row || isTouch) return;
+  const src = coverURL(+row.dataset.i, 600);
+  if (previewImg.getAttribute('src') !== src) previewImg.src = src;
+  preview.classList.add('is-on');
+});
+list.addEventListener('pointerleave', () => preview.classList.remove('is-on'));
+list.addEventListener('click', e => {
+  const row = e.target.closest('.row'); if (!row) return;
+  openRoll(+row.dataset.i, 0, row.querySelector('.row__t'));
+});
+
+/* ============================================================
+   Cursor — a viewfinder
+   ============================================================ */
+const vf = $('.vf'), vfLabel = $('.vf__label');
+let cx = P.x, cy = P.y;
+function setupCursor() {
+  root.classList.toggle('has-cursor', !isTouch);
+}
+document.addEventListener('pointerover', e => {
+  if (isTouch) return;
+  vf.classList.remove('is-away');
+  const t = e.target.closest('a,button,[data-cursor]');
+  const frame = !!t && t.matches('.roll__frame,.row,.viewer__half');
+  vf.classList.toggle('is-frame', frame);
+  vf.classList.toggle('is-link', !!t && !frame);
+  const l = t?.dataset.cursor || '';
+  vfLabel.textContent = l; vf.classList.toggle('has-label', !!l);
+});
+document.addEventListener('pointerleave', () => vf.classList.add('is-away'));
+addEventListener('blur', () => vf.classList.add('is-away'));
+addEventListener('pointerdown', () => vf.classList.add('is-down'));
+addEventListener('pointerup', () => vf.classList.remove('is-down'));
+
+/* ============================================================
+   Darkroom viewer
+   ============================================================ */
+const viewer = $('.viewer'), app = $('.app'), vImg = $('.viewer__img');
+const vNo = $('.viewer__no'), vTitle = $('.viewer__title'), vMeta = $('.viewer__meta');
+const vFrame = $('.viewer__frame'), thumbs = $('.thumbs'), nextRollBtn = $('.next-roll');
+const halfPrev = $('.viewer__half--prev'), halfNext = $('.viewer__half--next');
+const V = { open: false, visible: false, roll: 0, k: 0, from: 'sheet', lastFocus: null, wheelLock: 0, wheelAcc: 0 };
+
+function viewArea() {
+  const pad = Math.max(16, .035 * Math.min(innerWidth, innerHeight));
+  const small = innerWidth <= 700;
+  return { t: pad + (small ? 84 : 72), b: pad + (small ? 96 : 66), x: pad + (small ? 8 : 28) };
+}
+function applyArea() {
+  const a = viewArea();
+  viewer.style.setProperty('--vt', a.t + 'px'); viewer.style.setProperty('--vb', a.b + 'px'); viewer.style.setProperty('--vx', a.x + 'px');
+  GL?.layout();
+}
+
+function fillRoll(i, animate) {
+  const r = ROLLS[i];
+  vNo.textContent = `( ${p2(i + 1)} / ${N} )`;
+  if (animate) slideText(vTitle, r.t); else vTitle.innerHTML = `<span>${r.t}</span>`;
+  vMeta.textContent = `${r.p} — ${r.y}`;
+  thumbs.innerHTML = '';
+  for (let k = 0; k < FR; k++) {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', `Frame ${k + 1}`); b.dataset.k = k; b.dataset.cursor = p2(k + 1);
+    b.innerHTML = `<img src="${pic(i, k, 160, 107)}" alt="" crossorigin="anonymous">`;
+    thumbs.append(b);
+  }
+  const nx = (i + 1) % N;
+  nextRollBtn.textContent = `Next roll ▸ ${p2(nx + 1)}`;
+}
+thumbs.addEventListener('click', e => { const b = e.target.closest('button'); if (b) showPhoto(+b.dataset.k); });
+nextRollBtn.addEventListener('click', () => switchRoll((V.roll + 1) % N, 0));
+
+function showPhoto(k, first = false) {
+  V.k = k;
+  const r = ROLLS[V.roll];
+  $$('button', thumbs).forEach((b, j) => b.setAttribute('aria-current', j === k));
+  vFrame.textContent = `Frame ${p2(k + 1)} / ${p2(FR)}`;
+  halfPrev.dataset.cursor = k === 0 ? 'Prev roll' : 'Prev';
+  halfNext.dataset.cursor = k === FR - 1 ? 'Next roll' : 'Next';
+  if (vf.classList.contains('has-label')) {           // refresh label if hovering a half
+    const h = document.elementFromPoint(P.x, P.y)?.closest('.viewer__half');
+    if (h) vfLabel.textContent = h.dataset.cursor;
+  }
+  const url = photoURL(V.roll, k);
+  const dur = reduce ? 0 : first ? 1.8 : 1.0;
+  vImg.alt = `${r.t}, ${r.p} ${r.y} — frame ${k + 1} of ${FR}`;
+  // fallback develop (no WebGL): CSS filter from safelight red to print
+  vImg.classList.remove('is-dev'); viewer.style.setProperty('--dev', dur + 's');
+  vImg.onload = () => requestAnimationFrame(() => requestAnimationFrame(() => vImg.classList.add('is-dev')));
+  vImg.src = url;
+  GL?.load(url, dur);
+  // preload the next frame
+  const nr = k < FR - 1 ? V.roll : (V.roll + 1) % N, nk = k < FR - 1 ? k + 1 : 0;
+  const pre = new Image(); pre.crossOrigin = 'anonymous'; pre.src = photoURL(nr, nk);
+}
+function switchRoll(i, k) {
+  V.roll = i; fillRoll(i, true); showPhoto(k);
+}
+function nextPhoto() { V.k < FR - 1 ? showPhoto(V.k + 1) : switchRoll((V.roll + 1) % N, 0); }
+function prevPhoto() { V.k > 0 ? showPhoto(V.k - 1) : switchRoll((V.roll - 1 + N) % N, FR - 1); }
+halfPrev.addEventListener('click', () => { if (!V.swiped) prevPhoto(); });
+halfNext.addEventListener('click', () => { if (!V.swiped) nextPhoto(); });
+
+// swipe on touch
+let sw = null;
+viewer.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') sw = { x: e.clientX, y: e.clientY }; });
+viewer.addEventListener('pointerup', e => {
+  if (!sw) return; const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+  if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) { V.swiped = true; dx < 0 ? nextPhoto() : prevPhoto(); setTimeout(() => V.swiped = false, 50); }
+});
+function viewerWheel(e) {
+  const now = performance.now(); if (now < V.wheelLock) return;
+  V.wheelAcc += e.deltaY + e.deltaX;
+  if (Math.abs(V.wheelAcc) > 70) { V.wheelAcc > 0 ? nextPhoto() : prevPhoto(); V.wheelAcc = 0; V.wheelLock = now + 650; }
+}
+
+const rectInset = r => `inset(${Math.max(0, r.top)}px ${Math.max(0, innerWidth - r.right)}px ${Math.max(0, innerHeight - r.bottom)}px ${Math.max(0, r.left)}px)`;
+
+function openRoll(i, k = 0, fromEl) {
+  if (V.open) return;
+  V.open = true; V.visible = true; V.roll = i; V.from = root.dataset.view; V.lastFocus = document.activeElement;
+  preview.classList.remove('is-on');
+  app.inert = true; viewer.inert = false;
+  applyArea(); GL?.reset();
+  fillRoll(i, false);
+  viewer.classList.add('is-open', 'is-safelight');
+  const r = (fromEl || rolls[i].querySelector('.roll__frame')).getBoundingClientRect();
+  viewer.animate([{ clipPath: rectInset(r) }, { clipPath: 'inset(0px 0px 0px 0px)' }], { duration: reduce ? 1 : 750, easing: EXPO });
+  showPhoto(k, true);
+  $('.close').focus({ preventScroll: true });
+}
+function closeViewer() {
+  if (!V.open) return;
+  V.open = false;
+  let target;
+  if (V.from === 'sheet') {
+    goTo(V.roll, true);
+    if (!isTouch) tickStrip(performance.now());
+    target = rolls[V.roll].querySelector('.roll__frame');
+  } else {
+    target = $$('.row')[V.roll].querySelector('.row__t');
+  }
+  const r = target.getBoundingClientRect();
+  const anim = viewer.animate([{ clipPath: 'inset(0px 0px 0px 0px)' }, { clipPath: rectInset(r) }], { duration: reduce ? 1 : 600, easing: EXPO, fill: 'forwards' });
+  anim.onfinish = () => {
+    viewer.classList.remove('is-open'); anim.cancel(); V.visible = false;
+    viewer.inert = true; app.inert = false;
+    (V.from === 'sheet' ? target : target.closest('.row')).focus({ preventScroll: true });
+  };
+}
+$('.close').addEventListener('click', closeViewer);
+
+// rubbing the print pushes development under the pointer
+viewer.addEventListener('pointermove', e => GL?.rub(e.clientX, e.clientY), { passive: true });
+
+/* ============================================================
+   WebGL: the print developing in the tray
+   ============================================================ */
+let GL = null;
+async function initGL() {
+  try {
+    const THREE = await import('three');
+    const canvas = $('.viewer .gl');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    renderer.setPixelRatio(dpr);
+    const scene = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const hex = h => { const n = parseInt(h.slice(1), 16); return new THREE.Vector3((n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255); };
+
+    const blank = new THREE.DataTexture(new Uint8Array([232, 228, 220, 255]), 1, 1); blank.needsUpdate = true;
+    const rubCanvas = document.createElement('canvas'); rubCanvas.width = rubCanvas.height = 256;
+    const rctx = rubCanvas.getContext('2d');
+    const rubTex = new THREE.CanvasTexture(rubCanvas);
+
+    const U = {
+      uRes: { value: new THREE.Vector2() }, uDpr: { value: dpr }, uTime: { value: 0 },
+      uTex0: { value: blank }, uTex1: { value: blank },
+      uRect0: { value: new THREE.Vector4() }, uRect1: { value: new THREE.Vector4() },
+      uDev: { value: 0 }, uFade: { value: 1 }, uLight: { value: 0 }, uSeed: { value: 0 },
+      uRub: { value: rubTex },
+      uInk: { value: hex('#121110') }, uPaper: { value: hex('#e8e4dc') }, uSafe: { value: new THREE.Vector3(1, .3, .24) },
+    };
+    const mat = new THREE.ShaderMaterial({
+      uniforms: U,
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }`,
+      fragmentShader: /* glsl */`
+        precision highp float;
+        varying vec2 vUv;
+        uniform vec2 uRes; uniform float uDpr, uTime, uDev, uFade, uLight, uSeed;
+        uniform sampler2D uTex0, uTex1, uRub;
+        uniform vec4 uRect0, uRect1;        // x, y (bottom-left), w, h in CSS px
+        uniform vec3 uInk, uPaper, uSafe;
+
+        float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+        float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
+          return mix(mix(hash12(i), hash12(i+vec2(1,0)), u.x), mix(hash12(i+vec2(0,1)), hash12(i+vec2(1,1)), u.x), u.y); }
+        float fbm(vec2 p){ float v = 0., a = .5; mat2 r = mat2(.8,-.6,.6,.8);
+          for(int i=0;i<5;i++){ v += a * vnoise(p); p = r * p * 2.03; a *= .5; } return v; }
+        float lum(vec3 c){ return dot(c, vec3(.299, .587, .114)); }
+
+        // one sheet of paper in the tray. a = 1 where paper/print exists.
+        vec4 sheet(sampler2D tex, vec4 rect, vec2 p, float dev, float useRub){
+          float b = max(8., min(rect.z, rect.w) * .03);                  // paper border
+          vec2 q = (p - rect.xy + b) / (rect.zw + 2. * b);
+          if (q.x < 0. || q.y < 0. || q.x > 1. || q.y > 1.) return vec4(0.);
+          vec2 uv = (p - rect.xy) / rect.zw;
+          if (uv.x < 0. || uv.y < 0. || uv.x > 1. || uv.y > 1.) return vec4(uPaper, 1.);
+          vec3 img = texture2D(tex, uv).rgb;
+          float rub = texture2D(uRub, uv).r * useRub;
+          // darks reach density first; developer is uneven; agitation sends a slow wave across
+          float th = lum(img) * .72
+                   + fbm(uv * 3.2 + uSeed) * .26
+                   + sin(dot(uv, vec2(3.1, 2.3)) * 2. - uTime * 1.6) * .04;
+          float d = dev * 1.55 + rub * .9;
+          float k = smoothstep(th, th + .4, d);
+          return vec4(mix(uPaper, img, k), 1.);
+        }
+
+        void main(){
+          vec2 p = gl_FragCoord.xy / uDpr;
+          // darkroom: near-black with a red glow from the safelight above
+          vec2 g = (vUv - vec2(.5, 1.08)) * vec2(uRes.x / uRes.y, 1.);
+          vec3 bg = uInk + uSafe * .1 * (1. - uLight) * smoothstep(1.3, 0., length(g));
+          bg *= mix(.7, 1., smoothstep(1., .25, length(vUv - .5)));
+
+          vec4 a = sheet(uTex1, uRect1, p, 1.2, 0.);
+          vec4 b = sheet(uTex0, uRect0, p, uDev, 1.);
+          vec3 ca = mix(bg, a.rgb, a.a), cb = mix(bg, b.rgb, b.a);
+          vec3 col = mix(ca, cb, uFade);
+          float paper = mix(a.a, b.a, uFade);
+
+          // under safelight the print reads only as red value; room light restores colour
+          vec3 safe = vec3(lum(col)) * uSafe * .9;
+          col = mix(col, mix(safe, col, uLight), paper);
+
+          col += (hash12(gl_FragCoord.xy + fract(uTime * 7.) * 100.) - .5) * .045;   // grain
+          gl_FragColor = vec4(col, 1.);
+        }`
+    });
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+
+    const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
+    const slot = { cur: { tex: blank, asp: 1.5 }, prev: { tex: blank, asp: 1.5 } };
+    const st = { dev: 0, dur: 1.4, fade: 1, light: 0, token: 0, loaded: false };
+
+    function fit(asp) {
+      const a = viewArea(), W = innerWidth - 2 * a.x, H = innerHeight - a.t - a.b;
+      let w = W, h = W / asp; if (h > H) { h = H; w = H * asp; }
+      const x = a.x + (W - w) / 2, top = a.t + (H - h) / 2;
+      return { x, top, w, h, y: innerHeight - top - h };
+    }
+    function layout() {
+      renderer.setSize(innerWidth, innerHeight, false);
+      U.uRes.value.set(innerWidth, innerHeight);
+      const r0 = fit(slot.cur.asp), r1 = fit(slot.prev.asp);
+      U.uRect0.value.set(r0.x, r0.y, r0.w, r0.h); U.uRect1.value.set(r1.x, r1.y, r1.w, r1.h);
+    }
+    const dispose = t => { if (t && t !== blank) t.dispose(); };
+    function clearRub() { rctx.clearRect(0, 0, 256, 256); rubTex.needsUpdate = true; }
+
+    GL = {
+      layout,
+      reset() {
+        dispose(slot.cur.tex); dispose(slot.prev.tex);
+        slot.cur = { tex: blank, asp: 1.5 }; slot.prev = { tex: blank, asp: 1.5 };
+        U.uTex0.value = blank; U.uTex1.value = blank;
+        st.dev = 0; st.fade = 1; st.light = 0; st.loaded = false; st.token++;
+        clearRub(); layout();
+      },
+      load(url, dur) {
+        const token = ++st.token;
+        loader.load(url, tex => {
+          if (token !== st.token) { tex.dispose(); return; }
+          tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+          viewer.classList.remove('gl-miss');
+          dispose(slot.prev.tex);
+          slot.prev = slot.cur;
+          slot.cur = { tex, asp: tex.image.width / tex.image.height };
+          U.uTex1.value = slot.prev.tex; U.uTex0.value = tex;
+          U.uSeed.value = Math.random() * 50;
+          st.dev = 0; st.dur = Math.max(.001, dur); st.fade = slot.prev.tex === blank ? 1 : 0; st.loaded = true;
+          clearRub(); layout();
+        }, undefined, () => { if (token === st.token) viewer.classList.add('gl-miss'); });
+      },
+      rub(x, y) {
+        if (!st.loaded || st.dev >= 1) return;
+        const r = fit(slot.cur.asp);
+        const u = (x - r.x) / r.w, v = (y - r.top) / r.h;
+        if (u < 0 || v < 0 || u > 1 || v > 1) return;
+        const rad = 46 / r.w * 256;
+        const gr = rctx.createRadialGradient(u * 256, v * 256, 0, u * 256, v * 256, rad);
+        gr.addColorStop(0, 'rgba(255,255,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+        rctx.globalCompositeOperation = 'lighter'; rctx.fillStyle = gr;
+        rctx.fillRect(u * 256 - rad, v * 256 - rad, rad * 2, rad * 2);
+        rubTex.needsUpdate = true;
+      },
+      tick(dt) {
+        if (!V.visible) return;
+        if (st.loaded) st.dev = Math.min(1, st.dev + dt / st.dur);
+        st.fade = Math.min(1, st.fade + dt / .45);
+        const x = clamp((st.dev - .8) / .2, 0, 1), lightT = st.loaded ? x * x * (3 - 2 * x) : 0;
+        st.light += (lightT - st.light) * (reduce ? 1 : .14);
+        U.uDev.value = st.dev; U.uFade.value = st.fade; U.uLight.value = st.light;
+        if (!reduce) U.uTime.value += dt;
+        viewer.classList.toggle('is-safelight', st.light < .5);
+        renderer.render(scene, cam);
+      }
+    };
+    layout();
+    viewer.classList.remove('no-gl');
+    if (V.visible) { GL.reset(); GL.load(photoURL(V.roll, V.k), .6); }   // opened before three.js arrived
+  } catch (err) {
+    GL = null;
+    viewer.classList.add('no-gl');
+  }
+}
+initGL();
+
+/* ---------- fallback safelight indicator without WebGL ---------- */
+vImg.addEventListener('transitionend', () => { if (!GL) viewer.classList.remove('is-safelight'); });
+vImg.addEventListener('load', () => { if (!GL) { viewer.classList.add('is-safelight'); if (reduce) viewer.classList.remove('is-safelight'); } });
+
+/* ============================================================
+   Keyboard
+   ============================================================ */
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (V.open) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextPhoto(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevPhoto(); }
+    else if (e.key === 'Escape') closeViewer();
+    else if (e.key === 'Home') showPhoto(0);
+    else if (e.key === 'End') showPhoto(FR - 1);
+    else if (/^[1-6]$/.test(e.key)) showPhoto(+e.key - 1);
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if (k === 'i') { setView(root.dataset.view === 'index' ? 'sheet' : 'index'); return; }
+  if (k === 's' || e.key === 'Escape') { setView('sheet'); return; }
+  if (root.dataset.view !== 'sheet') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(S.cur + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(S.cur - 1); }
+  else if (e.key === 'Enter' && !e.target.closest('button,a')) openRoll(S.cur);
+  else if (/^[0-9]$/.test(e.key)) goTo(e.key === '0' ? 9 : +e.key - 1);
+});
+
+/* ============================================================
+   Single ticker
+   ============================================================ */
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (!isTouch) {
+    const k = reduce ? 1 : .2;
+    cx += (P.x - cx) * k; cy += (P.y - cy) * k;
+    vf.style.transform = `translate3d(${cx}px,${cy}px,0)`;
+    // index preview follows and tilts with pointer velocity
+    pvx += (P.x - pvx) * .12; pvy += (P.y - pvy) * .12;
+    const tilt = reduce ? 0 : clamp(P.vx * .5, -9, 9); P.vx *= .88;
+    preview.style.transform = `translate3d(${pvx + 40}px,${pvy - preview.offsetHeight / 2}px,0) rotate(${tilt}deg)`;
+  }
+  tickStrip(now);
+  if (!document.hidden) GL?.tick(dt);
+  requestAnimationFrame(tick);
+}
+
+/* ---------- resize / input-mode changes ---------- */
+function onResize() {
+  measure();
+  if (!isTouch) { S.tx = S.x = Math.max(0, S.cur) * S.step; }
+  else wrap.scrollLeft = Math.max(0, S.cur) * S.step;
+  applyArea();
+}
+addEventListener('resize', onResize);
+touchMQ.addEventListener?.('change', e => {
+  isTouch = e.matches; root.classList.toggle('is-touch', isTouch); setupCursor();
+  strip.style.transform = ''; onResize();
+});
+if (isTouch) $('.hint').textContent = '( Swipe ) ⟷';
+
+/* ============================================================
+   Loader: twelve sprocket holes = twelve cover images
+   ============================================================ */
+const loaderEl = $('.loader'), holes = $$('.loader__holes i'), lCount = $('.loader__count');
+let loadedN = 0, entered = false;
+const t0 = performance.now();
+function enter() {
+  if (entered) return; entered = true;
+  measure();
+  loaderEl.classList.add('is-done');
+  setTimeout(() => loaderEl.remove(), 1000);
+  root.classList.add('is-in');
+  if (!isTouch) { S.x = reduce ? 0 : -innerWidth * .75; S.tx = 0; S.lastInput = performance.now(); }  // film slides in from the right
+  S.ready = true;
+  setCurrent(0);
+}
+function onCover() {
+  loadedN++;
+  holes.slice(0, loadedN).forEach(h => h.classList.add('is-on'));
+  lCount.textContent = `${p2(loadedN)} / ${N}`;
+  if (loadedN >= N) setTimeout(enter, Math.max(250, 1400 - (performance.now() - t0)));
+}
+setupCursor();
+measure();
+setView('sheet');
+if (reduce) { loaderEl.remove(); enter(); }
+else {
+  scramble($('.loader__name'), 'LINA HADDAD', 1100);
+  $$('.roll__frame img').forEach(img => {
+    if (img.complete && img.naturalWidth) onCover();
+    else { img.addEventListener('load', onCover, { once: true }); img.addEventListener('error', onCover, { once: true }); }
+  });
+  setTimeout(enter, 4200);    // never trap anyone behind the loader
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

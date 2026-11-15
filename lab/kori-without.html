@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kōri — 氷 — Iced matcha bar, Rotterdam</title>
+<meta name="description" content="Kōri is an iced matcha, hojicha and wagashi bar on Witte de Withstraat 41, Rotterdam. Open Wednesday to Sunday, 10:00–18:00.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&family=Space+Grotesk:wght@300;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d1a12;
+  --paper:#eef3ea;
+  --frost:#f6faf7;
+  --accent:#9fd36b;
+  --muted:rgba(238,243,234,.55);
+  --line:rgba(238,243,234,.18);
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --sans:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.19,1,.22,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body.loading{overflow:hidden}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--accent);color:var(--ink)}
+
+/* ---------- WebGL stage ---------- */
+#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+.grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:1;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain .6s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-4%)}75%{transform:translate(-1%,3%)}100%{transform:translate(0,0)}}
+main{position:relative;z-index:2}
+
+/* ---------- Loader ---------- */
+#loader{position:fixed;inset:0;z-index:100;background:var(--frost);color:var(--ink);display:grid;place-items:center;
+  transition:clip-path 1.4s var(--ease);clip-path:inset(0 0 0 0)}
+#loader.out{clip-path:inset(0 0 100% 0)}
+#loader .k{font-family:var(--serif);font-weight:800;font-size:min(42vw,340px);line-height:1;position:relative;color:transparent;-webkit-text-stroke:1px var(--ink)}
+#loader .k span{position:absolute;inset:0;color:var(--ink);-webkit-text-stroke:0;clip-path:inset(var(--fill,100%) 0 0 0)}
+#loader .temp{position:absolute;bottom:32px;left:24px;font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+#loader .note{position:absolute;bottom:32px;right:24px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-align:right}
+
+/* ---------- Cursor ---------- */
+.cursor{position:fixed;left:0;top:0;z-index:90;pointer-events:none;mix-blend-mode:difference}
+.cursor .dot{position:absolute;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff}
+.cursor .ring{position:absolute;width:44px;height:44px;margin:-22px;border:1px solid #fff;border-radius:50%;
+  transition:width .5s var(--ease),height .5s var(--ease),margin .5s var(--ease),background .3s,border-radius .5s var(--ease)}
+.cursor .label{position:absolute;left:30px;top:-6px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:#fff;white-space:nowrap;opacity:0;transition:opacity .3s}
+.cursor.hover .ring{width:84px;height:84px;margin:-42px;background:#fff}
+.cursor.hover .label{opacity:1}
+.cursor.draw .ring{width:120px;height:120px;margin:-60px;border-style:dashed}
+.cursor.cube .ring{border-radius:18%}
+@media (pointer:coarse){.cursor{display:none}}
+@media (pointer:fine){body,a,button{cursor:none}}
+
+/* ---------- Chrome (fixed UI) ---------- */
+.hud{position:fixed;z-index:20;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;mix-blend-mode:difference;color:#fff}
+.hud.tl{top:20px;left:24px}
+.hud.tr{top:20px;right:24px;text-align:right}
+.hud.bl{bottom:20px;left:24px}
+.hud.br{bottom:20px;right:24px;text-align:right}
+.hud .logo{font-family:var(--serif);font-size:22px;font-weight:800;letter-spacing:0;text-transform:none}
+.hud button{all:unset;cursor:inherit;padding:2px 0;opacity:.5;transition:opacity .3s}
+.hud button.on,.hud button:hover{opacity:1}
+.hud button + button::before{content:"/";margin:0 8px;opacity:.4}
+.status i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7bd389;margin-right:8px;vertical-align:1px;animation:pulse 1.8s infinite}
+.status.closed i{background:#888;animation:none}
+@keyframes pulse{50%{opacity:.25}}
+.progress{position:fixed;right:0;top:0;width:2px;height:100vh;z-index:20;background:var(--line)}
+.progress span{display:block;width:100%;height:0;background:var(--paper)}
+
+/* ---------- Hero ---------- */
+.hero{height:100vh;min-height:560px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.word{display:flex;font-family:var(--serif);font-weight:800;font-size:clamp(96px,23vw,360px);line-height:.85;letter-spacing:-.02em;user-select:none}
+.word .ch{display:inline-block;overflow:hidden;padding:0 .01em}
+.word .ch b{display:inline-block;font-weight:inherit;transform:translateY(105%);will-change:transform}
+.ready .word .ch b{transition:transform 1.6s var(--ease);transform:translateY(0)}
+.hero .kanji{position:absolute;right:6vw;top:16vh;font-family:var(--serif);font-size:clamp(14px,1.4vw,18px);writing-mode:vertical-rl;letter-spacing:.5em;opacity:.8}
+.hero .sub{position:absolute;left:24px;bottom:72px;max-width:340px;font-size:15px;line-height:1.55;opacity:0;transform:translateY(12px);transition:1.2s var(--ease) .9s}
+.ready .hero .sub{opacity:1;transform:none}
+.hero .sub em{font-family:var(--serif);font-style:normal}
+.hero .hint{position:absolute;right:24px;bottom:72px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-align:right;line-height:1.9;color:var(--muted)}
+.hero .hint kbd{font-family:inherit;border:1px solid var(--line);padding:1px 6px;border-radius:3px;color:var(--paper)}
+.welcome{position:absolute;top:22vh;left:24px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- Marquee ---------- */
+.marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:18px 0;background:rgba(13,26,18,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.marquee .row{display:inline-flex;will-change:transform}
+.marquee span{font-family:var(--serif);font-size:clamp(28px,4vw,56px);padding-right:.6em}
+.marquee span.o{color:transparent;-webkit-text-stroke:1px var(--paper)}
+
+/* ---------- Statement ---------- */
+.statement{padding:28vh 24px 22vh;max-width:1200px;margin:0 auto}
+.statement .lbl,.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;display:block}
+.statement p{font-family:var(--serif);font-size:clamp(28px,4.4vw,64px);line-height:1.18;font-weight:500}
+.statement p .w{display:inline-block;opacity:.12;transition:opacity .6s}
+.statement p .w.lit{opacity:1}
+
+/* ---------- Horizontal menu ---------- */
+.menu{position:relative}
+.menu .pin{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.menu .head{position:absolute;top:72px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:baseline}
+.menu .head h2{font-family:var(--serif);font-weight:500;font-size:clamp(20px,2vw,28px)}
+.menu .count{font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+.track{display:flex;gap:4vw;padding:0 24px 0 24px;will-change:transform}
+.card{flex:0 0 auto;width:min(78vw,460px);height:min(62vh,560px);position:relative;border:1px solid var(--line);
+  display:flex;flex-direction:column;justify-content:space-between;padding:24px;background:rgba(13,26,18,.18);
+  backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  transition:border-color .5s,background .5s,transform .8s var(--ease)}
+.card:hover{border-color:var(--paper);background:rgba(238,243,234,.06)}
+.card .n{font-family:var(--mono);font-size:11px;letter-spacing:.08em;display:flex;justify-content:space-between}
+.card .jp{font-family:var(--serif);font-size:clamp(72px,10vw,140px);line-height:1;font-weight:800;writing-mode:vertical-rl;position:absolute;right:20px;top:56px;opacity:.9;transition:transform 1s var(--ease)}
+.card:hover .jp{transform:translateY(-12px)}
+.card h3{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.2vw,44px);line-height:1.05;margin-bottom:14px}
+.card p{font-size:14px;line-height:1.6;max-width:30ch;color:var(--muted)}
+.card .temp{font-family:var(--mono);font-size:11px;margin-top:18px;letter-spacing:.08em}
+.card.intro{border:none;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;justify-content:center;width:min(70vw,380px)}
+.card.intro p{font-family:var(--serif);font-size:clamp(22px,2.4vw,32px);color:var(--paper);line-height:1.3;max-width:none}
+
+/* ---------- Frost glass ---------- */
+.glass{position:relative;height:100vh;min-height:560px;overflow:hidden}
+.glass .under{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.glass .under .big{font-family:var(--serif);font-weight:800;font-size:clamp(64px,13vw,200px);line-height:.95}
+.glass .under .small{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-top:24px;color:var(--paper)}
+#frost{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}
+.glass .cap{position:absolute;left:24px;top:24px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);pointer-events:none;line-height:1.8}
+.glass .reset{position:absolute;right:24px;top:24px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(13,26,18,.3);padding:6px 10px;border-radius:30px}
+.glass .reset:hover{background:var(--ink);color:var(--frost)}
+
+/* ---------- Visit ---------- */
+.visit{padding:22vh 24px 16vh;display:grid;grid-template-columns:repeat(12,1fr);gap:24px;max-width:1400px;margin:0 auto}
+.visit .title{grid-column:1/-1;font-family:var(--serif);font-weight:500;font-size:clamp(40px,7vw,104px);line-height:1;margin-bottom:8vh}
+.visit .title .o{color:transparent;-webkit-text-stroke:1px var(--paper)}
+.week{grid-column:1/8;display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line)}
+.day{padding:18px 0 22px;border-bottom:1px solid var(--line);position:relative}
+.day .d{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.day .h{font-family:var(--serif);font-size:clamp(16px,1.6vw,22px);margin-top:20px;line-height:1.2}
+.day.off{color:var(--muted)}
+.day.off .h{text-decoration:line-through;text-decoration-thickness:1px}
+.day.today::after{content:"";position:absolute;left:0;right:12px;bottom:-1px;height:2px;background:var(--accent)}
+.where{grid-column:9/-1;font-size:15px;line-height:1.7}
+.where .addr{font-family:var(--serif);font-size:clamp(24px,2.4vw,34px);line-height:1.2;margin-bottom:24px;display:inline-block;position:relative}
+.where .addr::after{content:"";position:absolute;left:0;bottom:-4px;height:1px;width:100%;background:currentColor;transform-origin:right;transform:scaleX(0);transition:transform .8s var(--ease)}
+.where .addr:hover::after{transform-origin:left;transform:scaleX(1)}
+.where .live{font-family:var(--mono);font-size:12px;letter-spacing:.06em;margin-top:18px;display:block}
+.where .muted{color:var(--muted)}
+
+/* ---------- Footer ---------- */
+footer{position:relative;overflow:hidden;padding:0 24px 24px}
+footer .giant{font-family:var(--serif);font-weight:800;font-size:clamp(160px,46vw,720px);line-height:.8;text-align:center;color:transparent;-webkit-text-stroke:1px var(--paper);user-select:none;transition:color 1.2s var(--ease)}
+footer .giant:hover{color:var(--paper)}
+footer .base{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);padding-top:18px;margin-top:24px}
+
+/* ---------- reveal util ---------- */
+.rv{opacity:0;transform:translateY(40px);transition:opacity 1.2s var(--ease),transform 1.2s var(--ease)}
+.rv.in{opacity:1;transform:none}
+
+@media (max-width:820px){
+  .hero .hint{display:none}
+  .hero .sub{bottom:64px;right:24px}
+  .hud.bl{display:none}
+  .week{grid-column:1/-1}
+  .where{grid-column:1/-1;margin-top:8vh}
+  .day .h{font-size:13px}
+  .day .d{font-size:10px}
+  .menu .head{top:64px}
+}
+@media (prefers-reduced-motion:reduce){
+  .grain{animation:none}
+  *{transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body class="loading">
+
+<!-- Loader: the 氷 freezes from the bottom up while the temperature drops -->
+<div id="loader" aria-hidden="true">
+  <div class="k">氷<span id="loadK">氷</span></div>
+  <div class="temp" id="loadTemp">+21.0°C</div>
+  <div class="note">Freezing the glass<br>Kōri / Rotterdam</div>
+</div>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="cursor" aria-hidden="true"><div class="ring"></div><div class="dot"></div><div class="label" id="cLabel"></div></div>
+
+<div class="hud tl"><a href="#top" class="logo" data-cursor="Top">氷 Kōri</a></div>
+<div class="hud tr">
+  <div class="status" id="hudStatus"><i></i><span>—</span></div>
+  <div style="margin-top:8px" id="hudClock">Rotterdam --:--</div>
+</div>
+<div class="hud bl" role="group" aria-label="Choose a tea colour">
+  <button data-pal="matcha" class="on" data-cursor="[M] Matcha">Matcha</button><button data-pal="hojicha" data-cursor="[H] Hojicha">Hojicha</button><button data-pal="wagashi" data-cursor="[W] Wagashi">Wagashi</button>
+</div>
+<div class="hud br"><a href="#visit" data-cursor="Directions">Witte de Withstraat 41 ↓</a></div>
+<div class="progress" aria-hidden="true"><span id="prog"></span></div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Kōri">
+    <div class="welcome" id="welcome"></div>
+    <h1 class="word" id="word" aria-label="Kōri">
+      <span class="ch"><b>K</b></span><span class="ch"><b>ō</b></span><span class="ch"><b>r</b></span><span class="ch"><b>i</b></span>
+    </h1>
+    <div class="kanji">氷 — 冷たい抹茶の店</div>
+    <p class="sub">An iced matcha bar on <em>Witte de Withstraat</em>. Stone‑ground matcha, roasted hojicha and a few quiet wagashi — served cold, poured slowly.</p>
+    <div class="hint">Move to stir · Click to drop ice<br><kbd>M</kbd> <kbd>H</kbd> <kbd>W</kbd> change the tea · <kbd>Space</kbd> ice</div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true"><div class="row" id="mq"></div></div>
+
+  <!-- STATEMENT -->
+  <section class="statement">
+    <span class="lbl">(01) — The idea</span>
+    <p id="statement">Kōri means ice. Everything we pour starts as a cold, green question: how slowly can something melt? Come in, sit down, and watch your glass answer it.</p>
+  </section>
+
+  <!-- MENU (horizontal) -->
+  <section class="menu" id="menu" aria-label="Menu">
+    <div class="pin">
+      <div class="head"><h2><span class="lbl" style="display:inline;margin:0 16px 0 0">(02)</span>What we pour</h2><span class="count" id="mCount">01 / 04</span></div>
+      <div class="track" id="track">
+        <article class="card intro">
+          <p>Three things, done properly. Scroll — or let the colour change as you look.</p>
+        </article>
+        <article class="card" data-pal="matcha" data-cursor="Matcha">
+          <div class="n"><span>No. 01</span><span>Iced</span></div>
+          <div class="jp" aria-hidden="true">抹茶</div>
+          <div>
+            <h3>Iced<br>Matcha</h3>
+            <p>Ceremonial matcha whisked by hand, poured over a single slow‑melting block. Straight, or over oat milk.</p>
+            <div class="temp">Served at 4°C</div>
+          </div>
+        </article>
+        <article class="card" data-pal="hojicha" data-cursor="Hojicha">
+          <div class="n"><span>No. 02</span><span>Iced</span></div>
+          <div class="jp" aria-hidden="true">焙茶</div>
+          <div>
+            <h3>Iced<br>Hojicha</h3>
+            <p>Roasted green tea — toasty, low in caffeine, a little like caramel and campfire. The afternoon one.</p>
+            <div class="temp">Served at 4°C</div>
+          </div>
+        </article>
+        <article class="card" data-pal="wagashi" data-cursor="Wagashi">
+          <div class="n"><span>No. 03</span><span>Seasonal</span></div>
+          <div class="jp" aria-hidden="true">和菓子</div>
+          <div>
+            <h3>A few<br>Wagashi</h3>
+            <p>Small Japanese sweets that change with the season. Made to sit next to bitter tea. When they're gone, they're gone.</p>
+            <div class="temp">Room temperature, on purpose</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FROST GLASS -->
+  <section class="glass" id="glass" aria-label="Draw on the frosted glass">
+    <div class="under">
+      <div class="big">See you<br>on Wednesday.</div>
+      <div class="small">Wed – Sun · 10:00 – 18:00 · Witte de Withstraat 41</div>
+    </div>
+    <canvas id="frost" data-cursor="Draw on the glass"></canvas>
+    <div class="cap" id="frostCap">(03) — Cold glass<br>Draw with your finger. It fogs back up.</div>
+    <button class="reset" id="frostReset" data-cursor="Breathe">Breathe on it</button>
+  </section>
+
+  <!-- VISIT -->
+  <section class="visit" id="visit" aria-label="Visit">
+    <h2 class="title rv"><span class="lbl">(04) — Visit</span>Five days<br>a week, <span class="o">cold.</span></h2>
+    <div class="week rv" id="week" role="list" aria-label="Opening hours"></div>
+    <div class="where rv">
+      <a class="addr" href="https://www.google.com/maps/search/?api=1&query=Witte+de+Withstraat+41+Rotterdam" target="_blank" rel="noopener" data-cursor="Open map ↗">Witte de Withstraat 41<br>Rotterdam</a>
+      <p class="muted">Between the galleries and the bars. Look for the blue‑white door and the block of ice in the window.</p>
+      <span class="live" id="live">—</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="giant" aria-hidden="true">氷</div>
+    <div class="base">
+      <span>Kōri — Iced matcha · hojicha · wagashi</span>
+      <span>Witte de Withstraat 41, Rotterdam</span>
+      <span>Wed–Sun 10–18</span>
+    </div>
+  </footer>
+</main>
+
+<!-- ================= Shaders ================= -->
+<script id="vs" type="x-shader/x-vertex">
+attribute vec2 p;
+void main(){ gl_Position = vec4(p,0.,1.); }
+</script>
+<script id="fs" type="x-shader/x-fragment">
+precision highp float;
+uniform vec2  uRes;
+uniform float uTime;
+uniform vec2  uMouse;
+uniform vec2  uVel;
+uniform float uScroll;
+uniform vec3  uA;   // deep
+uniform vec3  uB;   // body
+uniform vec3  uC;   // highlight / foam
+uniform vec4  uRip[6]; // xy pos, z start time, w strength
+
+float h1(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+vec2  h2(vec2 p){ return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453); }
+float noise(vec2 p){
+  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+  return mix(mix(h1(i),h1(i+vec2(1,0)),u.x), mix(h1(i+vec2(0,1)),h1(i+vec2(1,1)),u.x), u.y);
+}
+float fbm(vec2 p){
+  float v=0., a=.5; mat2 r=mat2(.8,.6,-.6,.8);
+  for(int i=0;i<5;i++){ v+=a*noise(p); p=r*p*2.02; a*=.5; }
+  return v;
+}
+// iq-style voronoi: x = distance to edge, yz = vector to cell centre, w = cell id hash
+vec4 voro(vec2 x){
+  vec2 n=floor(x), f=fract(x), mg=vec2(0), mr=vec2(0); float md=8.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){
+    vec2 g=vec2(float(i),float(j)); vec2 o=h2(n+g);
+    o=.5+.38*sin(uTime*.25+6.2831*o);
+    vec2 r=g+o-f; float d=dot(r,r);
+    if(d<md){ md=d; mr=r; mg=g; }
+  }
+  md=8.;
+  for(int j=-2;j<=2;j++) for(int i=-2;i<=2;i++){
+    vec2 g=mg+vec2(float(i),float(j)); vec2 o=h2(n+g);
+    o=.5+.38*sin(uTime*.25+6.2831*o);
+    vec2 r=g+o-f;
+    if(dot(mr-r,mr-r)>.00001) md=min(md, dot(.5*(mr+r), normalize(r-mr)));
+  }
+  return vec4(md, mr, h1(n+mg));
+}
+
+void main(){
+  vec2 uv = gl_FragCoord.xy/uRes;
+  vec2 p  = (gl_FragCoord.xy-.5*uRes)/uRes.y;
+  vec2 m  = (uMouse-.5*uRes)/uRes.y;
+
+  // dropped-ice ripples
+  for(int i=0;i<6;i++){
+    vec4 r=uRip[i];
+    float t=uTime-r.z;
+    if(t>0. && t<6.){
+      vec2 rp=(r.xy-.5*uRes)/uRes.y;
+      vec2 dv=p-rp; float d=length(dv);
+      float w=sin(d*38.-t*7.)*exp(-t*.9)*exp(-d*2.5)*r.w;
+      p+=normalize(dv+1e-5)*w*.025;
+    }
+  }
+  // cursor stirs the tea
+  float md=length(p-m);
+  p -= uVel*exp(-md*7.)*.6;
+  p += (p-m)*-.06*exp(-md*5.);
+
+  // floating ice blocks
+  vec2 q = p*1.8 + vec2(0., uTime*.02 + uScroll*.9);
+  vec4 v = voro(q);
+  float isIce = step(.55, v.w);
+  float edge  = v.x;
+  vec2 refr   = v.yz*isIce*.22;
+
+  // liquid body — domain-warped fbm
+  float t = uTime*.04;
+  vec2 lp = p*1.25 + refr + vec2(0., uScroll*.35);
+  vec2 w1 = vec2(fbm(lp+vec2(0.,t)), fbm(lp+vec2(5.2,1.3-t)));
+  float f = fbm(lp + 1.6*w1 + vec2(t*.6,-t));
+  vec3 col = mix(uA, uB, smoothstep(.2,.85,f));
+  col = mix(col, uC, pow(smoothstep(.55,1.,f+.15*w1.x),3.)*.55);
+
+  // inside an ice block: brighter, cooler, a touch milky
+  col = mix(col, col*1.25 + vec3(.05,.07,.08), isIce*.55*smoothstep(.0,.25,edge));
+  // crisp edges + inner bevel
+  float rim = 1.-smoothstep(0.,.018,edge);
+  float bevel = (1.-smoothstep(.02,.12,edge))*isIce;
+  col += rim*isIce*.35 + bevel*.08;
+  // tiny trapped bubbles
+  float b = step(.985, h1(floor(q*28.)))*isIce*smoothstep(.06,.2,edge);
+  col += b*.25;
+
+  // cursor is a little lamp over the bar
+  col += pow(max(0.,1.-md*1.3),6.)*.18*uC;
+
+  // vignette + grain
+  col *= .55 + .45*smoothstep(1.25,.25,length(uv-.5)*1.3);
+  col += (h1(gl_FragCoord.xy+fract(uTime))-.5)*.035;
+  gl_FragColor = vec4(col,1.);
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* ---------------- Palettes ---------------- */
+const PAL = {
+  matcha : { a:[.03,.09,.05], b:[.25,.48,.16], c:[.80,.93,.55], accent:'#9fd36b' },
+  hojicha: { a:[.08,.04,.02], b:[.42,.22,.10], c:[.93,.74,.52], accent:'#e0a46a' },
+  wagashi: { a:[.10,.05,.08], b:[.62,.36,.44], c:[.98,.88,.86], accent:'#f2b8c6' }
+};
+let cur = { a:[...PAL.matcha.a], b:[...PAL.matcha.b], c:[...PAL.matcha.c] };
+let target = PAL.matcha, palName = 'matcha';
+function setPal(name){
+  if(!PAL[name]) return;
+  target = PAL[name]; palName = name;
+  document.documentElement.style.setProperty('--accent', PAL[name].accent);
+  $$('.hud.bl button').forEach(b => b.classList.toggle('on', b.dataset.pal === name));
+  store.set('kori-pal', name);
+}
+
+/* ---------------- WebGL ---------------- */
+const cv = $('#gl');
+const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'high-performance'});
+let U = {}, ripples = [], ripIdx = 0;
+for(let i=0;i<6;i++) ripples.push([0,0,-99,0]);
+const mouse = {x:innerWidth/2, y:innerHeight/2, sx:innerWidth/2, sy:innerHeight/2, vx:0, vy:0};
+let dpr = Math.min(devicePixelRatio||1, 1.5) * 0.75; // render a bit under-res: it's liquid, nobody sees the pixels
+
+function compile(type, src){
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; }
+  return s;
+}
+function initGL(){
+  if(!gl){ cv.style.background = 'radial-gradient(circle at 50% 40%, #3f7a29, #0d1a12 70%)'; return false; }
+  const vs = compile(gl.VERTEX_SHADER, $('#vs').textContent);
+  const fs = compile(gl.FRAGMENT_SHADER, $('#fs').textContent);
+  if(!vs || !fs) return false;
+  const pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(pr)); return false; }
+  gl.useProgram(pr);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  ['uRes','uTime','uMouse','uVel','uScroll','uA','uB','uC','uRip'].forEach(n => U[n] = gl.getUniformLocation(pr, n));
+  return true;
+}
+const glOK = initGL();
+function resize(){
+  cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
+  if(gl) gl.viewport(0,0,cv.width,cv.height);
+  sizeMenu(); sizeFrost();
+}
+function drop(x, y, s){
+  ripples[ripIdx] = [x*dpr, (innerHeight - y)*dpr, now, s||1];
+  ripIdx = (ripIdx+1) % 6;
+}
+
+/* ---------------- Cursor ---------------- */
+const cur$ = $('.cursor'), ring = $('.cursor .ring'), dot = $('.cursor .dot'), lab = $('#cLabel');
+let rx = mouse.x, ry = mouse.y;
+addEventListener('pointermove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  dot.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+}, {passive:true});
+document.addEventListener('pointerover', e => {
+  const t = e.target.closest('[data-cursor]');
+  if(!t){ cur$.classList.remove('hover','draw'); lab.textContent=''; return; }
+  lab.textContent = t.dataset.cursor;
+  if(t.id === 'frost'){ cur$.classList.add('draw'); cur$.classList.remove('hover'); }
+  else { cur$.classList.add('hover'); cur$.classList.remove('draw'); }
+});
+
+/* ---------------- Hero letters push away from cursor ---------------- */
+const letters = $$('#word .ch');
+function heroLetters(){
+  const heroOn = scrollY < innerHeight;
+  if(!heroOn) return;
+  letters.forEach((el,i) => {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const dx = cx - mouse.sx, dy = cy - mouse.sy, d = Math.hypot(dx,dy) || 1;
+    const f = Math.max(0, 1 - d/420);
+    const k = f*f*38;
+    el.style.transform = `translate(${dx/d*k}px,${dy/d*k + scrollY*(.12+i*.05)}px) skewX(${(-mouse.vx)*.4*f}deg)`;
+  });
+}
+
+/* ---------------- Marquee ---------------- */
+const mq = $('#mq');
+const words = ['Iced matcha','抹茶','Iced hojicha','ほうじ茶','Wagashi','和菓子','Wed–Sun 10–18','氷'];
+let html = '';
+for(let r=0;r<2;r++) words.forEach((w,i) => html += `<span class="${i%2?'o':''}">${w} —</span>`);
+mq.innerHTML = html;
+let mqX = 0, lastScroll = scrollY, scrollVel = 0;
+
+/* ---------------- Statement word-by-word lighting ---------------- */
+const st = $('#statement');
+st.innerHTML = st.textContent.split(' ').map(w => `<span class="w">${w}</span>`).join(' ');
+const stWords = $$('#statement .w');
+function lightStatement(){
+  const r = st.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (innerHeight*.85 - r.top) / (r.height + innerHeight*.35)));
+  const n = Math.floor(p * stWords.length * 1.05);
+  stWords.forEach((w,i) => w.classList.toggle('lit', i < n));
+}
+
+/* ---------------- Horizontal menu ---------------- */
+const menu = $('#menu'), track = $('#track'), cards = $$('.card'), mCount = $('#mCount');
+let menuDist = 0;
+function sizeMenu(){
+  menuDist = Math.max(0, track.scrollWidth - innerWidth + 48);
+  menu.style.height = (innerHeight + menuDist) + 'px';
+}
+let menuPal = null;
+function menuScroll(){
+  const r = menu.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, -r.top / (menuDist || 1)));
+  track.style.transform = `translate3d(${-p*menuDist}px,0,0)`;
+  const idx = Math.min(cards.length-1, Math.round(p*(cards.length-1)));
+  mCount.textContent = String(idx+1).padStart(2,'0') + ' / ' + String(cards.length).padStart(2,'0');
+  // tea colour follows the card nearest the centre while in this section
+  if(r.top <= 0 && r.bottom >= innerHeight){
+    let best=null, bd=1e9;
+    cards.forEach(c => { if(!c.dataset.pal) return; const cr=c.getBoundingClientRect(); const d=Math.abs(cr.left+cr.width/2-innerWidth/2); if(d<bd){bd=d;best=c;} });
+    if(best && bd < innerWidth*.35 && best.dataset.pal !== menuPal){ menuPal = best.dataset.pal; setPal(menuPal); }
+  }
+  // gentle tilt per card
+  cards.forEach(c => { const cr=c.getBoundingClientRect(); const o=(cr.left+cr.width/2-innerWidth/2)/innerWidth; c.style.transform=`translateY(${o*o*60}px) rotate(${o*3}deg)`; });
+}
+cards.forEach(c => c.addEventListener('pointerenter', () => { if(c.dataset.pal) setPal(c.dataset.pal); }));
+
+/* ---------------- Frosted glass (2D canvas) ---------------- */
+const fc = $('#frost'), fx = fc.getContext('2d');
+let fW=0, fH=0, fScale = 1, frostNoise = null, drawing = false, last = null, refog = 0, drew = false;
+function makeNoise(w,h){
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const x = c.getContext('2d'); const id = x.createImageData(w,h);
+  for(let i=0;i<id.data.length;i+=4){
+    const n = 225 + Math.random()*30;
+    id.data[i]=n-6; id.data[i+1]=n; id.data[i+2]=n-2; id.data[i+3]=200+Math.random()*40;
+  }
+  x.putImageData(id,0,0);
+  // droplets
+  for(let i=0;i<w*h/900;i++){
+    const r=Math.random()*2.2+.4, px=Math.random()*w, py=Math.random()*h;
+    x.fillStyle='rgba(255,255,255,.55)'; x.beginPath(); x.arc(px,py,r,0,7); x.fill();
+    x.fillStyle='rgba(120,140,125,.25)'; x.beginPath(); x.arc(px+r*.3,py+r*.4,r*.7,0,7); x.fill();
+  }
+  return c;
+}
+function fullFog(){ fx.globalCompositeOperation='source-over'; fx.globalAlpha=1; fx.clearRect(0,0,fW,fH); fx.drawImage(frostNoise,0,0,fW,fH); }
+function sizeFrost(){
+  const r = fc.getBoundingClientRect();
+  fScale = Math.min(devicePixelRatio||1, 2) * .5;
+  const w = Math.max(1, Math.round(r.width*fScale)), h = Math.max(1, Math.round(r.height*fScale));
+  if(w === fW && h === fH) return;
+  fW = fc.width = w; fH = fc.height = h;
+  frostNoise = makeNoise(w,h);
+  fullFog();
+  loadGhost();
+}
+function wipe(x,y){
+  const r = 34*fScale*2;
+  fx.globalCompositeOperation = 'destination-out';
+  fx.globalAlpha = 1;
+  const pts = last ? Math.ceil(Math.hypot(x-last.x,y-last.y)/(r*.25)) : 1;
+  for(let i=0;i<pts;i++){
+    const t = pts===1?1:i/(pts-1);
+    const px = last ? last.x+(x-last.x)*t : x, py = last ? last.y+(y-last.y)*t : y;
+    const g = fx.createRadialGradient(px,py,0,px,py,r);
+    g.addColorStop(0,'rgba(0,0,0,.9)'); g.addColorStop(.6,'rgba(0,0,0,.6)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    fx.fillStyle = g; fx.beginPath(); fx.arc(px,py,r,0,7); fx.fill();
+  }
+  // occasional drip running down from the stroke
+  if(Math.random() < .04){ drips.push({x, y, v:.2+Math.random()*.5, life:60+Math.random()*120}); }
+  last = {x,y}; drew = true;
+}
+const drips = [];
+function fpos(e){ const r = fc.getBoundingClientRect(); return {x:(e.clientX-r.left)*fScale, y:(e.clientY-r.top)*fScale}; }
+fc.addEventListener('pointerdown', e => { drawing = true; last = null; const p=fpos(e); wipe(p.x,p.y); try{fc.setPointerCapture(e.pointerId);}catch(_){} });
+fc.addEventListener('pointermove', e => {
+  const p = fpos(e);
+  // mouse users wipe just by moving over the glass; touch users need to press (so scrolling still works)
+  if(drawing || e.pointerType === 'mouse'){ wipe(p.x,p.y); } else last = null;
+});
+fc.addEventListener('pointerleave', () => { last = null; });
+addEventListener('pointerup', () => { if(drawing || drew) saveGhost(); drawing = false; last = null; });
+$('#frostReset').addEventListener('click', () => { fullFog(); store.del('kori-mark'); $('#frostCap').innerHTML = '(03) — Cold glass<br>Draw with your finger. It fogs back up.'; });
+let saveT = 0;
+function saveGhost(){
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    try{
+      // store a small greyscale version of what you cleared so the glass "remembers" you next time
+      const s = document.createElement('canvas'); s.width = 240; s.height = Math.round(240*fH/fW);
+      const x = s.getContext('2d'); x.drawImage(fc,0,0,s.width,s.height);
+      store.set('kori-mark', s.toDataURL('image/png'));
+    }catch(e){}
+  }, 400);
+}
+function loadGhost(){
+  const d = store.get('kori-mark'); if(!d) return;
+  const img = new Image();
+  img.onload = () => {
+    // paint the previous visit's clearing back in, softened, as a faint trace
+    const t = document.createElement('canvas'); t.width=fW; t.height=fH;
+    const tx = t.getContext('2d'); tx.drawImage(img,0,0,fW,fH);
+    fx.globalCompositeOperation='destination-in'; fx.globalAlpha=1;
+    fx.drawImage(t,0,0);
+    fx.globalCompositeOperation='source-over'; fx.globalAlpha=.55;
+    fx.drawImage(frostNoise,0,0,fW,fH); fx.globalAlpha=1;
+    $('#frostCap').innerHTML = '(03) — Cold glass<br>Your mark from last time is still here.';
+  };
+  img.src = d;
+}
+function frostTick(){
+  // re-fog very slowly, like breath on a cold window
+  if(++refog % 6 === 0){
+    fx.globalCompositeOperation='source-over'; fx.globalAlpha=.018;
+    fx.drawImage(frostNoise,0,0,fW,fH); fx.globalAlpha=1;
+  }
+  if(drips.length){
+    fx.globalCompositeOperation='destination-out';
+    for(let i=drips.length-1;i>=0;i--){
+      const d=drips[i]; d.y+=d.v; d.v*=.995; d.life--;
+      fx.beginPath(); fx.arc(d.x,d.y,2.2*fScale*2,0,7); fx.fill();
+      if(d.life<=0) drips.splice(i,1);
+    }
+    fx.globalCompositeOperation='source-over';
+  }
+}
+
+/* ---------------- Opening hours (Europe/Amsterdam) ---------------- */
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const OPEN = {Wed:1,Thu:1,Fri:1,Sat:1,Sun:1};
+function nowAms(){
+  try{
+    const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Amsterdam',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+    const g = t => (parts.find(p=>p.type===t)||{}).value;
+    let h = parseInt(g('hour'),10); if(h===24) h=0;
+    return {day:g('weekday'), h, m:parseInt(g('minute'),10)};
+  }catch(e){ const d=new Date(); return {day:DAYS[(d.getDay()+6)%7], h:d.getHours(), m:d.getMinutes()}; }
+}
+const week = $('#week');
+week.innerHTML = DAYS.map(d => `<div class="day ${OPEN[d]?'':'off'}" role="listitem" data-d="${d}"><div class="d">${d}</div><div class="h">${OPEN[d]?'10–18':'Closed'}</div></div>`).join('');
+function updateHours(){
+  const t = nowAms(), mins = t.h*60+t.m;
+  const open = !!OPEN[t.day] && mins >= 600 && mins < 1080;
+  $$('.day').forEach(el => el.classList.toggle('today', el.dataset.d === t.day));
+  const hs = $('#hudStatus');
+  hs.classList.toggle('closed', !open);
+  let msg;
+  if(open){
+    const left = 1080 - mins;
+    msg = left <= 60 ? `Open — last pour in ${left} min` : `Open now — until 18:00`;
+  } else {
+    // find next opening day
+    let i = DAYS.indexOf(t.day), label = '';
+    if(OPEN[t.day] && mins < 600) label = 'today at 10:00';
+    else { for(let k=1;k<=7;k++){ const d = DAYS[(i+k)%7]; if(OPEN[d]){ label = (k===1?'tomorrow':d) + ' at 10:00'; break; } } }
+    msg = `Closed — opens ${label}`;
+  }
+  hs.querySelector('span').textContent = msg;
+  $('#live').textContent = '● ' + msg;
+  $('#hudClock').textContent = `Rotterdam ${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}`;
+}
+updateHours(); setInterval(updateHours, 30000);
+
+/* ---------------- Returning-visitor greeting ---------------- */
+const visits = (parseInt(store.get('kori-visits')||'0',10) || 0) + 1;
+store.set('kori-visits', String(visits));
+const lastPal = store.get('kori-pal');
+$('#welcome').textContent = visits === 1 ? 'First visit · the ice is fresh' : `Welcome back · visit no. ${String(visits).padStart(2,'0')}`;
+if(lastPal && PAL[lastPal] && visits > 1){ setPal(lastPal); cur = {a:[...PAL[lastPal].a], b:[...PAL[lastPal].b], c:[...PAL[lastPal].c]}; }
+
+/* ---------------- Input ---------------- */
+$$('.hud.bl button').forEach(b => b.addEventListener('click', () => setPal(b.dataset.pal)));
+addEventListener('keydown', e => {
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if(k==='m') setPal('matcha');
+  if(k==='h') setPal('hojicha');
+  if(k==='w') setPal('wagashi');
+  if(k===' ' && scrollY < innerHeight*.8){ e.preventDefault(); drop(innerWidth*(.2+Math.random()*.6), innerHeight*(.2+Math.random()*.6), 1.4); }
+});
+addEventListener('pointerdown', e => {
+  if(e.target.closest('a,button,#frost')) return;
+  drop(e.clientX, e.clientY, 1);
+  cur$.classList.add('cube'); setTimeout(()=>cur$.classList.remove('cube'), 300);
+});
+
+/* ---------------- Reveal on view ---------------- */
+const io = new IntersectionObserver(es => es.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } }), {threshold:.2});
+$$('.rv').forEach(el => io.observe(el));
+
+/* ---------------- Loop ---------------- */
+let now = 0; const t0 = performance.now();
+function lerp(a,b,t){ return a+(b-a)*t; }
+function frame(){
+  now = (performance.now()-t0)/1000;
+
+  // smoothed mouse + velocity
+  const pmx = mouse.sx, pmy = mouse.sy;
+  mouse.sx = lerp(mouse.sx, mouse.x, .12); mouse.sy = lerp(mouse.sy, mouse.y, .12);
+  mouse.vx = lerp(mouse.vx, mouse.sx-pmx, .2); mouse.vy = lerp(mouse.vy, mouse.sy-pmy, .2);
+  rx = lerp(rx, mouse.x, .18); ry = lerp(ry, mouse.y, .18);
+  ring.style.transform = `translate(${rx}px,${ry}px)`;
+  lab.style.transform = `translate(${rx}px,${ry}px)`;
+
+  // scroll
+  const sy = scrollY;
+  scrollVel = lerp(scrollVel, sy-lastScroll, .1); lastScroll = sy;
+  const maxS = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  $('#prog').style.height = (sy/maxS*100) + '%';
+
+  // palette easing
+  ['a','b','c'].forEach(k => { for(let i=0;i<3;i++) cur[k][i] = lerp(cur[k][i], target[k][i], .04); });
+
+  if(glOK){
+    gl.uniform2f(U.uRes, cv.width, cv.height);
+    gl.uniform1f(U.uTime, reduce ? now*.25 : now);
+    gl.uniform2f(U.uMouse, mouse.sx*dpr, (innerHeight-mouse.sy)*dpr);
+    gl.uniform2f(U.uVel, mouse.vx/innerHeight, -mouse.vy/innerHeight);
+    gl.uniform1f(U.uScroll, sy/innerHeight);
+    gl.uniform3fv(U.uA, cur.a); gl.uniform3fv(U.uB, cur.b); gl.uniform3fv(U.uC, cur.c);
+    gl.uniform4fv(U.uRip, new Float32Array(ripples.flat()));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // marquee reacts to scroll speed and direction
+  if(!reduce){
+    mqX -= .6 + Math.abs(scrollVel)*.6;
+    const half = mq.scrollWidth/2; if(half && -mqX > half) mqX += half;
+    mq.style.transform = `translate3d(${mqX}px,0,0) skewX(${Math.max(-12,Math.min(12,-scrollVel*.4))}deg)`;
+  }
+
+  heroLetters();
+  lightStatement();
+  menuScroll();
+  frostTick();
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- Loader ---------------- */
+function boot(){
+  resize();
+  addEventListener('resize', resize);
+  requestAnimationFrame(frame);
+  const lk = $('#loadK'), lt = $('#loadTemp');
+  const start = performance.now(), dur = reduce ? 300 : 1900;
+  (function tick(){
+    const p = Math.min(1, (performance.now()-start)/dur);
+    const e = 1-Math.pow(1-p,3);
+    lk.style.setProperty('--fill', (100-e*100)+'%');
+    const temp = 21 - e*25; // +21°C room → −4°C
+    lt.textContent = (temp>=0?'+':'−') + Math.abs(temp).toFixed(1) + '°C';
+    if(p < 1) requestAnimationFrame(tick);
+    else setTimeout(() => {
+      $('#loader').classList.add('out');
+      document.body.classList.remove('loading');
+      document.body.classList.add('ready');
+      drop(innerWidth/2, innerHeight/2, 1.6);
+      setTimeout(() => $('#loader').remove(), 1500);
+    }, 250);
+  })();
+}
+if(document.fonts && document.fonts.ready){
+  Promise.race([document.fonts.ready, new Promise(r=>setTimeout(r,1500))]).then(boot);
+} else boot();
+
+})();
+</script>
+</body>
+</html>

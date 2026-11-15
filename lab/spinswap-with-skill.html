@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPIN SWAP Screens</title>
+<!-- Intended faces. Non-blocking so the mock still renders offline with the local fallbacks. -->
+<link rel="stylesheet" media="print" onload="this.media='all'"
+  href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+ol,ul{list-style:none}
+[hidden]:not(.h-view){display:none !important}
+
+:root{
+  --c-paper:#e7e4dc;   /* inner-sleeve paper */
+  --c-vinyl:#0f0f0e;   /* vinyl black */
+  --c-label:#ff4a1c;   /* centre-label vermilion, the one accent */
+  --c-sub:#6b6860;     /* sub text */
+  --c-line:rgba(15,15,14,.18);
+  --ff-display:"Big Shoulders Display","TeX Gyre Heros Cn","Arial Narrow","Liberation Sans Narrow",sans-serif;
+  --ff-serif:"Instrument Serif","Lora",Georgia,serif;
+  --ff-text:"Hanken Grotesk","TeX Gyre Heros","Helvetica Neue",Arial,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.3,.1,.1,1);
+  --ease-expo:cubic-bezier(.16,1,.3,1);
+}
+html.is-mono{--ff-display:var(--ff-mono);--ff-serif:var(--ff-mono);--ff-text:var(--ff-mono)}
+
+body{
+  background:#d6d2c8;color:var(--c-vinyl);
+  font:500 13px/1.4 var(--ff-text);
+  font-feature-settings:"palt";font-synthesis:none;-webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+:focus-visible{outline:1.5px solid var(--c-label);outline-offset:2px}
+.mono{font-family:var(--ff-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.serif{font-family:var(--ff-serif);font-style:italic;font-weight:400}
+.disp{font-family:var(--ff-display);font-weight:800;text-transform:uppercase;line-height:.86;letter-spacing:-.01em}
+
+/* ───────── presentation page (quiet) ───────── */
+.deck-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:28px 32px 20px;border-bottom:1px solid var(--c-line)}
+.deck-head h1{font-size:clamp(56px,8vw,112px)}
+.deck-head h1 sup{font-family:var(--ff-mono);font-size:11px;font-weight:500;letter-spacing:.06em;vertical-align:top;margin-left:6px;position:relative;top:10px}
+.deck-head .tag{font-size:24px;margin-top:6px}
+.deck-meta{display:flex;flex-direction:column;gap:7px;align-items:flex-end;text-align:right;color:var(--c-sub)}
+.deck-meta b{color:var(--c-vinyl);font-weight:500}
+.fit-btn{border:1px solid currentColor;padding:6px 9px;border-radius:99px;color:var(--c-vinyl)}
+.fit-btn[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.rack-wrap{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.rack{display:flex;gap:56px;padding:40px 32px 48px;width:max-content}
+.slot{scroll-snap-align:center;width:412px;display:flex;flex-direction:column;align-items:center;gap:22px}
+.cap{width:390px;min-height:78px;align-content:start;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:baseline}
+.cap .n{color:var(--c-label)}
+.cap h2{font-size:30px}
+.cap p{grid-column:2;color:var(--c-sub);font-size:12px;line-height:1.35}
+.states{width:390px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.states button{border:1px solid var(--c-vinyl);padding:6px 9px;border-radius:99px;transition:background .2s var(--ease),color .2s var(--ease)}
+.states button:hover{background:rgba(15,15,14,.08)}
+.states button[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.haptic{margin-left:auto;display:flex;gap:6px;align-items:center;color:var(--c-sub)}
+.haptic i{width:8px;height:8px;border-radius:50%;border:1px solid var(--c-sub);transition:background .3s,border-color .3s,transform .3s var(--ease)}
+.haptic.is-on i{background:var(--c-label);border-color:var(--c-label);transform:scale(1.5);transition-duration:.02s}
+.haptic.is-on b{color:var(--c-vinyl)}
+.haptic b{font-weight:500;min-width:48px}
+.slot.is-flash .phone{box-shadow:0 0 0 10px var(--c-vinyl),0 0 0 13px var(--c-label),0 30px 60px -24px rgba(0,0,0,.4)}
+
+/* ───────── phone shell ───────── */
+.phone{width:390px;height:844px;border-radius:52px;background:var(--c-paper);position:relative;overflow:hidden;overflow:clip;isolation:isolate;
+  box-shadow:0 0 0 10px var(--c-vinyl),0 0 0 11px #3b3a36,0 30px 60px -24px rgba(0,0,0,.4);transition:box-shadow .4s var(--ease)}
+.island{position:absolute;top:11px;left:50%;width:122px;height:35px;margin-left:-61px;border-radius:20px;background:#000;z-index:50;pointer-events:none}
+.sbar{position:absolute;top:0;left:0;right:0;height:47px;display:flex;justify-content:space-between;align-items:center;padding:6px 30px 0 34px;z-index:40;font:600 15px/1 var(--ff-text);pointer-events:none}
+.sbar .r{font:500 10px/1 var(--ff-mono);letter-spacing:.04em}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:currentColor;opacity:.85;z-index:60;pointer-events:none}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:47px}
+.dark{background:var(--c-vinyl);color:var(--c-paper)}
+
+/* shared bits */
+.topbar{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:10px}
+.rule{height:1px;background:var(--c-line);flex:none}
+.btn{display:flex;align-items:center;justify-content:space-between;height:54px;border-radius:999px;padding:0 22px;
+  background:var(--c-vinyl);color:var(--c-paper);font:600 15px/1 var(--ff-text);letter-spacing:.01em;width:100%;
+  transition:transform .2s var(--ease),background .2s var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn .arr{color:var(--c-label);font-family:var(--ff-mono);font-weight:700}
+.btn.accent{background:var(--c-label);color:var(--c-vinyl)}
+.btn.accent .arr{color:var(--c-vinyl)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.link{border-bottom:1px solid transparent;transition:border-color .2s}
+.link:hover{border-color:currentColor}
+.chip{border:1px solid var(--c-vinyl);border-radius:99px;padding:8px 11px 7px;display:inline-flex;gap:6px;align-items:baseline;white-space:nowrap;
+  transition:background .2s var(--ease),color .2s var(--ease),transform .2s var(--ease)}
+.chip:active{transform:scale(.95)}
+.chip sup{font:500 9px/1 var(--ff-mono)}
+.chip[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.chip[aria-pressed="true"] sup{color:var(--c-label)}
+
+/* cover art (placeholder sleeves made from gradients) */
+.cv{width:var(--s);height:var(--s);flex:none;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.cv-t{position:absolute;left:7%;bottom:6%;right:7%;font:600 calc(var(--s)*.055)/1.1 var(--ff-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--fg)}
+.cv-n{position:absolute;right:7%;top:6%;font:500 calc(var(--s)*.045)/1 var(--ff-mono);color:var(--fg);opacity:.8}
+.cv.sm .cv-t,.cv.sm .cv-n{display:none}
+
+/* CSS record */
+.disc-wrap{position:relative;border-radius:50%}
+.disc{position:absolute;inset:0;border-radius:50%;
+  background:
+    radial-gradient(circle,var(--c-paper) 0 1.6%,transparent 1.8%),
+    radial-gradient(circle,var(--lbl,var(--c-label)) 0 17%,#080808 17.3% 18.6%,transparent 18.8%),
+    radial-gradient(circle,transparent 0 47%,#060606 47.2% 48.4%,transparent 48.6% 69%,#060606 69.2% 70.2%,transparent 70.4%),
+    repeating-radial-gradient(circle,#161615 0 1px,#22211f 1.4px 2.2px),
+    #111;
+  box-shadow:0 0 0 1px #000,0 10px 24px -8px rgba(0,0,0,.5);will-change:transform}
+.disc-lbl{position:absolute;inset:33%;border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--c-vinyl);transition:transform .2s var(--ease)}
+.disc-lbl b{font:800 calc(var(--d)*.06)/.9 var(--ff-display);text-transform:uppercase;display:block}
+.disc-lbl span{font:500 calc(var(--d)*.026)/1.2 var(--ff-mono);letter-spacing:.06em;text-transform:uppercase;display:block;margin-top:2px}
+.disc-sheen{position:absolute;inset:0;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+  background:conic-gradient(from 20deg,transparent 0 18deg,rgba(255,255,255,.16) 36deg,transparent 62deg 198deg,rgba(255,255,255,.12) 216deg,transparent 242deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 18.6%,#000 19%);mask:radial-gradient(circle,transparent 0 18.6%,#000 19%)}
+
+/* ───────── (01) ONBOARDING ───────── */
+#p1 .scr{background:var(--c-vinyl)}
+.ob-top{color:var(--c-paper)}
+.ob-top .skip{color:var(--c-paper);opacity:.75}
+.ob-stage{position:relative;height:320px;flex:none;touch-action:none}
+.ob-stage canvas{position:absolute;inset:0;width:100%;height:100%}
+.arm{position:absolute;left:356px;top:34px;width:0;height:262px;transform-origin:0 0;will-change:transform;pointer-events:none}
+.arm-rod{position:absolute;left:-1.5px;top:-34px;width:3px;height:244px;background:linear-gradient(#bdb9ae,#e7e4dc 30%,#9f9b91);border-radius:2px}
+.arm-head{position:absolute;left:-30px;top:206px;width:60px;height:60px;pointer-events:auto;cursor:grab;touch-action:none}
+.arm-head::before{content:"";position:absolute;left:21px;top:4px;width:18px;height:34px;border-radius:3px;background:var(--c-paper);box-shadow:inset 0 -8px 0 #bdb9ae;transform:rotate(-14deg)}
+.arm-head::after{content:"";position:absolute;left:26px;top:44px;width:7px;height:7px;border-radius:50%;background:var(--c-label);box-shadow:0 0 0 0 rgba(255,74,28,.6);animation:pulse 1.6s var(--ease) infinite}
+.is-dropped .arm-head::after{animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,74,28,.6)}100%{box-shadow:0 0 0 14px rgba(255,74,28,0)}}
+.arm-base{position:absolute;left:330px;top:8px;width:52px;height:52px;border-radius:50%;border:1px solid rgba(231,228,220,.35);display:grid;place-items:center;pointer-events:none}
+.arm-base::after{content:"";width:22px;height:22px;border-radius:50%;background:#2a2926;box-shadow:inset 0 0 0 1px rgba(231,228,220,.4)}
+.ob-hint{position:absolute;left:18px;bottom:14px;color:var(--c-paper);text-align:left;transition:opacity .3s}
+.ob-hint em{color:var(--c-label);font-style:normal}
+.ob-rpm{position:absolute;left:18px;top:6px;color:rgba(231,228,220,.6)}
+.ob-rpm b{color:var(--c-paper);font-weight:500}
+.is-dropped .ob-hint{opacity:0}
+.ob-panel{flex:1;position:relative;background:var(--c-paper);border-radius:26px 26px 0 0;overflow:hidden;overflow:clip;touch-action:pan-y}
+.ob-step{position:absolute;inset:0;padding:16px 20px 30px;display:flex;flex-direction:column;gap:12px;
+  opacity:0;visibility:hidden;transform:translateX(28px);pointer-events:none;transition:opacity .45s var(--ease),transform .55s var(--ease-expo),visibility 0s .55s}
+.ob-step.is-on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition-delay:0s}
+.ob-step.is-past{transform:translateX(-28px)}
+.ob-track{display:flex;gap:12px;color:var(--c-sub)}
+.ob-track span.on{color:var(--c-vinyl)}
+.ob-track span.on::before{content:"● ";color:var(--c-label)}
+.ob-title{font-size:48px}
+.ob-gate .word{font-size:112px;letter-spacing:-.02em;margin-top:-4px}
+.ob-gate .word span{display:block}
+.ob-gate .word span:last-child{color:transparent;-webkit-text-stroke:1.5px var(--c-vinyl)}
+.ob-gate .tag{font-size:24px;line-height:1.05}
+.ob-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.ob-foot .row{display:flex;justify-content:space-between;color:var(--c-sub)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{color:var(--c-sub)}
+.field input{height:46px;border:0;border-bottom:1px solid var(--c-vinyl);background:transparent;font:600 22px/1 var(--ff-text);letter-spacing:.02em;outline:none;padding:0 2px}
+.field input:focus{border-bottom-color:var(--c-label)}
+.radius{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.radius button{border:1px solid var(--c-vinyl);border-radius:14px;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:background .2s var(--ease),color .2s var(--ease)}
+.radius button i{width:28px;height:28px;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 3px,currentColor 3px 4px);-webkit-mask:radial-gradient(circle,#000 0 var(--m),transparent calc(var(--m) + .5px));mask:radial-gradient(circle,#000 0 var(--m),transparent calc(var(--m) + .5px))}
+.radius button[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.radius button[aria-pressed="true"] i{color:var(--c-label)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.search{display:flex;gap:8px;align-items:center}
+.search .field{flex:1;min-width:0}
+.search .field input{width:100%}
+.search .scan{border:1px solid var(--c-vinyl);border-radius:99px;padding:9px 10px;white-space:nowrap}
+.results li{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--c-line)}
+.results li .t{flex:1;min-width:0}
+.results li .t b{display:block;font:600 14px/1.15 var(--ff-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.results li .t span{font-size:14px}
+.results li button{border:1px solid var(--c-vinyl);border-radius:99px;padding:7px 10px;min-width:74px;transition:background .2s,color .2s}
+.results li button[aria-pressed="true"]{background:var(--c-label);border-color:var(--c-label)}
+.ob-welcome{align-items:flex-start;justify-content:center}
+.ob-welcome .ob-title{font-size:70px}
+
+/* ───────── (02) HOME / CRATE ───────── */
+#p2 .scr{background:var(--c-paper)}
+.h-top .loc b{color:var(--c-label);font-weight:500}
+.seg{display:flex;border:1px solid var(--c-vinyl);border-radius:99px;overflow:hidden}
+.seg button{padding:6px 9px}
+.seg button[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.h-title{display:flex;align-items:flex-end;justify-content:space-between;padding:4px 18px 10px;flex:none}
+.h-title h3{font-size:88px;letter-spacing:-.02em}
+.h-title h3 sup{font:500 12px/1 var(--ff-mono);vertical-align:top;margin-left:4px;position:relative;top:8px;color:var(--c-label)}
+.h-title .redig{padding:6px 0;margin-bottom:6px}
+.h-body{flex:1;position:relative;min-height:0}
+.h-view{position:absolute;inset:0;display:flex;flex-direction:column;transition:opacity .4s var(--ease),transform .5s var(--ease-expo)}
+.h-view[hidden]{display:flex;opacity:0;pointer-events:none;transform:scale(.98)}
+.pv{height:170px;flex:none;margin:0 18px;border-top:1px solid var(--c-vinyl);border-bottom:1px solid var(--c-vinyl);display:flex;gap:14px;align-items:center;position:relative;cursor:pointer}
+.pv-art{position:relative;width:132px;height:132px;flex:none}
+.pv-art .disc-wrap{position:absolute;left:0;top:6px;width:120px;height:120px;--d:120px;transform:translateX(34px);transition:transform .6s var(--ease-expo)}
+.pv-art .cv{position:absolute;left:0;top:0;transition:clip-path .55s var(--ease-expo)}
+.pv.is-swap .pv-art .cv{clip-path:inset(100% 0 0 0)}
+.pv.is-swap .disc-wrap{transform:translateX(0)}
+.pv.is-out .disc-wrap{transform:translateX(190px)}
+.pv-meta{flex:1;min-width:0;padding-left:26px;display:flex;flex-direction:column;gap:6px}
+.pv-meta .idx{color:var(--c-label)}
+.pv-meta .art{font-size:17px;line-height:1}
+.pv-meta h4{font-size:34px;line-height:.86;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pv-meta .m{color:var(--c-sub);display:flex;gap:4px 12px;flex-wrap:wrap}
+.filters{flex:none;display:flex;gap:6px;overflow-x:auto;padding:10px 18px 10px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filters .chip{padding:6px 9px 5px;font-size:12px}
+.list{flex:1;overflow-y:auto;position:relative;scroll-snap-type:y proximity;perspective:600px;scrollbar-width:none;
+  -webkit-mask:linear-gradient(#000 0 82%,transparent);mask:linear-gradient(#000 0 82%,transparent)}
+.list::-webkit-scrollbar{display:none}
+.list-in{transform-origin:50% 0;will-change:transform}
+.row{height:62px;display:grid;grid-template-columns:30px 40px 1fr auto;gap:12px;align-items:center;padding:0 18px;border-bottom:1px solid var(--c-line);scroll-snap-align:start;cursor:pointer;
+  transition:background .3s var(--ease),color .3s var(--ease),opacity .3s var(--ease)}
+.row .i{color:var(--c-sub)}
+.row .tt{min-width:0}
+.row .tt b{display:block;font:800 20px/.95 var(--ff-display);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .tt span{font-size:13.5px;color:var(--c-sub)}
+.row .d{text-align:right;color:var(--c-sub);line-height:1.5}
+.list.has-lift .row{opacity:.45}
+.list.has-lift .row.is-lift{opacity:1;background:var(--c-vinyl);color:var(--c-paper)}
+.row.is-lift .i{color:var(--c-label)}
+.row.is-lift .tt span,.row.is-lift .d{color:rgba(231,228,220,.7)}
+.row.in{animation:rowin .45s var(--ease-expo) both}
+@keyframes rowin{from{opacity:0;transform:translateY(14px)}}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 30px 50px;
+  background:repeating-linear-gradient(-45deg,transparent 0 7px,rgba(15,15,14,.06) 7px 8px)}
+.empty .rings{width:150px;height:150px;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 13px,rgba(15,15,14,.35) 13px 14px);position:relative}
+.empty .rings::after{content:"";position:absolute;inset:58px;border-radius:50%;background:var(--c-label)}
+.empty p{font-size:26px;line-height:1}
+.empty .btn{width:auto;gap:14px}
+.groove{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:6px}
+.g-map{position:relative;width:354px;height:354px;flex:none}
+.g-ring{position:absolute;left:50%;top:50%;border-radius:50%;border:1px solid var(--c-line);transform:translate(-50%,-50%)}
+.g-ring span{position:absolute;left:50%;top:-6px;transform:translateX(-50%);background:var(--c-paper);padding:0 4px;color:var(--c-sub)}
+.g-sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,74,28,0) 0 300deg,rgba(255,74,28,.18) 356deg,rgba(255,74,28,.0) 360deg);will-change:transform}
+.g-sweep::after{content:"";position:absolute;left:50%;top:0;width:1px;height:50%;background:var(--c-label)}
+.g-you{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:var(--c-label);display:grid;place-items:center;font:800 13px/1 var(--ff-display)}
+.g-dot{position:absolute;width:26px;height:26px;margin:-13px;border-radius:50%;--d:26px;transition:transform .25s var(--ease)}
+.g-dot .disc{box-shadow:0 0 0 1px #000}
+.g-dot.ping{transform:scale(1.35)}
+.g-dot[aria-pressed="true"]{transform:scale(1.5);outline:1.5px solid var(--c-label);outline-offset:3px}
+.g-card{margin:8px 18px 0;align-self:stretch;border-top:1px solid var(--c-vinyl);padding-top:10px;display:flex;gap:12px;align-items:center;min-height:62px}
+.g-card .t{flex:1;min-width:0}
+.g-card .t b{display:block;font:800 22px/.95 var(--ff-display);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-card .go{border:1px solid var(--c-vinyl);border-radius:99px;padding:9px 12px}
+.g-card .hint{color:var(--c-sub)}
+.tabs{height:84px;flex:none;border-top:1px solid var(--c-vinyl);display:grid;grid-template-columns:1fr 1fr auto 1fr;align-items:start;padding:12px 14px 0;background:var(--c-paper)}
+.tabs button{padding:8px 4px;text-align:center}
+.tabs button.on::before{content:"● ";color:var(--c-label)}
+.tabs sup{color:var(--c-label);font-size:8px}
+.tabs .spin{background:var(--c-vinyl);color:var(--c-paper);border-radius:99px;padding:9px 14px;margin:0 6px}
+.tabs .spin em{font-style:normal;color:var(--c-label)}
+
+/* ───────── (03) DETAIL ───────── */
+#p3 .scr{background:var(--c-paper)}
+.d-scroll{flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:20px}
+.d-scroll::-webkit-scrollbar{display:none}
+.d-stage{height:262px;position:relative;margin:4px 18px 0;border-top:1px solid var(--c-vinyl);border-bottom:1px solid var(--c-vinyl);overflow:hidden;
+  background:radial-gradient(circle at 70% 50%,rgba(15,15,14,.06),transparent 60%)}
+.d-stage .disc-wrap{position:absolute;left:18px;top:21px;width:220px;height:220px;--d:220px;transform:translateX(0);transition:transform .9s var(--ease-expo);touch-action:none;cursor:grab}
+.d-stage.is-in .disc-wrap{transform:translateX(118px)}
+.d-stage .cv{position:absolute;left:0;top:13px;box-shadow:6px 8px 22px -10px rgba(0,0,0,.45);transition:transform .7s var(--ease-expo)}
+.d-stage:not(.is-in) .cv{transform:translateY(8px)}
+.d-stage .flag{position:absolute;color:var(--c-sub)}
+.d-stage .rpm{right:8px;top:8px}
+.d-stage .rpm b{color:var(--c-vinyl);font-weight:500}
+.d-stage .scr-hint{right:8px;bottom:8px}
+.disc-lbl.is-flip{transform:scaleX(0)}
+.d-head{padding:14px 18px 4px}
+.d-head .art{font-size:24px}
+.d-head h3{font-size:56px;margin-top:4px}
+.d-head h3 .ch{display:inline-block}
+.d-head .m{color:var(--c-sub);margin-top:10px;display:flex;gap:4px 14px;flex-wrap:wrap}
+.d-sec{margin:16px 18px 0}
+.d-sec-h{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--c-vinyl)}
+.sides{display:flex;gap:4px}
+.sides button{padding:5px 8px;border-radius:99px}
+.sides button[aria-pressed="true"]{background:var(--c-vinyl);color:var(--c-paper)}
+.tracks{position:relative;overflow:hidden}
+.tracks ol{transition:transform .45s var(--ease-expo),opacity .3s var(--ease)}
+.tracks ol.is-out{transform:translateX(-30px);opacity:0}
+.tracks li{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;height:44px;border-bottom:1px solid var(--c-line);cursor:pointer;position:relative}
+.tracks li .n{color:var(--c-label)}
+.tracks li .t{font:600 14px/1.15 var(--ff-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tracks li .p{color:var(--c-sub)}
+.tracks li::after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:100%;background:var(--c-label);transform:scaleX(0);transform-origin:left}
+.tracks li.is-play::after{animation:fill 30s linear forwards}
+.tracks li.is-play .p{color:var(--c-label)}
+@keyframes fill{to{transform:scaleX(1)}}
+.spec{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--c-line);align-items:baseline}
+.spec dt{color:var(--c-sub)}
+.spec dd{font:600 13.5px/1.35 var(--ff-text)}
+.grade{display:flex;gap:3px;margin-top:2px}
+.grade span{font:500 10px/1 var(--ff-mono);padding:4px 5px;border:1px solid var(--c-line);border-radius:3px;color:var(--c-sub)}
+.grade span.on{background:var(--c-vinyl);border-color:var(--c-vinyl);color:var(--c-paper)}
+.etch{font-size:19px;line-height:1.15;font-weight:400}
+.dbl{border-top:3px double var(--c-vinyl);margin-top:2px}
+.owner{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:3px double var(--c-vinyl)}
+.owner .disc-wrap{width:40px;height:40px;--d:40px;flex:none}
+.owner .disc-lbl b{font-size:11px}
+.owner .t{flex:1}
+.owner .t b{font:600 15px/1.2 var(--ff-text)}
+.owner .t div{color:var(--c-sub);margin-top:3px}
+.d-cta{flex:none;padding:12px 18px 30px;border-top:1px solid var(--c-vinyl);display:flex;flex-direction:column;gap:8px;background:var(--c-paper)}
+.d-cta .row2{display:flex;justify-content:space-between;color:var(--c-sub)}
+.veil{position:absolute;inset:0;background:rgba(15,15,14,.45);opacity:0;pointer-events:none;transition:opacity .3s var(--ease);z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--c-paper);border-radius:26px 26px 0 0;z-index:21;padding:10px 18px 30px;
+  transform:translateY(102%);transition:transform .45s var(--ease-expo);display:flex;flex-direction:column;gap:12px}
+.has-sheet .veil{opacity:1;pointer-events:auto}
+.has-sheet .sheet{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--c-line);margin:0 auto 4px}
+.sheet h4{font-size:40px}
+.sheet .sub{color:var(--c-sub);display:flex;justify-content:space-between}
+.mine label{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--c-line);cursor:pointer}
+.mine label .t{flex:1;min-width:0}
+.mine label .t b{display:block;font:600 14px/1.2 var(--ff-text)}
+.mine label .t span{font-size:14px;color:var(--c-sub)}
+.mine input{position:absolute;opacity:0;pointer-events:none}
+.mine .rd{width:20px;height:20px;border-radius:50%;border:1px solid var(--c-vinyl);display:grid;place-items:center;flex:none}
+.mine input:checked + .rd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--c-label)}
+.mine input:focus-visible + .rd{outline:1.5px solid var(--c-label);outline-offset:2px}
+.sheet textarea{border:1px solid var(--c-line);border-radius:12px;background:transparent;padding:10px 12px;font:500 14px/1.35 var(--ff-text);resize:none;height:62px;outline:none}
+.sheet textarea:focus{border-color:var(--c-vinyl)}
+
+/* ───────── (04) CHAT (quiet) ───────── */
+#p4 .scr{background:var(--c-paper)}
+.c-top{height:56px;border-bottom:1px solid var(--c-vinyl)}
+.c-top .who{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
+.c-top .disc-wrap{width:34px;height:34px;--d:34px;flex:none}
+.c-top .disc-lbl b{font-size:10px}
+.c-top .who b{font:600 16px/1.1 var(--ff-text);display:block}
+.c-top .who .mono{color:var(--c-sub);font-size:9px;margin-top:3px}
+.offer{margin:10px 14px 0;border:1px solid var(--c-vinyl);border-radius:18px;padding:12px 12px 10px;flex:none;background:var(--c-paper);position:relative;z-index:2}
+.offer-h{display:flex;justify-content:space-between;color:var(--c-sub);margin-bottom:10px}
+.offer-h b{color:var(--c-vinyl);font-weight:500}
+.ex{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center}
+.ex-side{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ex-side.r{align-items:flex-end;text-align:right}
+.ex-art{position:relative;width:56px;height:56px}
+.ex-art .disc-wrap{position:absolute;inset:4px;--d:48px;transition:transform .3s var(--ease)}
+.ex-side:not(.r) .ex-art .disc-wrap{transform:translateX(18px)}
+.ex-side.r .ex-art .disc-wrap{transform:translateX(-18px)}
+.ex-art .cv{position:absolute;inset:0}
+.ex-side.r .ex-art{margin-right:18px}
+.ex-side .k{color:var(--c-sub);font-size:9px}
+.ex-side .t{font:600 12.5px/1.2 var(--ff-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex-side .g{font-size:9px}
+.ex-mid{text-align:center;font:500 16px/1 var(--ff-mono);color:var(--c-label)}
+.offer.swapping .ex-side:not(.r) .ex-art{animation:swapR .7s var(--ease-expo)}
+.offer.swapping .ex-side.r .ex-art{animation:swapL .7s var(--ease-expo)}
+@keyframes swapR{0%{transform:none}50%{transform:translate(70px,-26px) rotate(90deg)}100%{transform:translate(0,0) rotate(180deg)}}
+@keyframes swapL{0%{transform:none}50%{transform:translate(-70px,26px) rotate(-90deg)}100%{transform:translate(0,0) rotate(-180deg)}}
+.stat{position:relative;margin:14px 4px 4px;height:28px}
+.stat::before{content:"";position:absolute;left:0;right:0;top:4px;height:1px;background:var(--c-line)}
+.stat .fillln{position:absolute;left:0;top:4px;height:1px;background:var(--c-label);transition:width .6s var(--ease-expo)}
+.stat .needle{position:absolute;top:0;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--c-label);transition:left .6s var(--ease-expo)}
+.stat ol{display:flex;justify-content:space-between}
+.stat li{position:relative;padding-top:14px;font:500 8.5px/1 var(--ff-mono);letter-spacing:.06em;color:var(--c-sub)}
+.stat li.done{color:var(--c-vinyl)}
+.offer-act{display:flex;gap:8px;margin-top:8px}
+.offer-act button{flex:1;height:38px;border-radius:99px;font:600 13px/1 var(--ff-text);border:1px solid var(--c-vinyl);transition:transform .15s var(--ease)}
+.offer-act button:active{transform:scale(.96)}
+.offer-act .ag{background:var(--c-vinyl);color:var(--c-paper)}
+.offer-done{display:none;justify-content:space-between;color:var(--c-sub);margin-top:8px;height:38px;align-items:center}
+.offer.is-agreed .offer-act{display:none}
+.offer.is-agreed .offer-done{display:flex}
+.msgs{flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:6px;scrollbar-width:none}
+.msgs::-webkit-scrollbar{display:none}
+.day{align-self:center;color:var(--c-sub);margin:2px 0 6px}
+.msg{max-width:78%;display:flex;flex-direction:column;gap:3px}
+.msg p{padding:9px 13px 10px;border-radius:18px;font:500 14.5px/1.4 var(--ff-text)}
+.msg .ts{font-size:8.5px;color:var(--c-sub)}
+.msg.them{align-self:flex-start}
+.msg.them p{border:1px solid var(--c-vinyl);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.me p{background:var(--c-vinyl);color:var(--c-paper);border-bottom-right-radius:5px}
+.msg.in{animation:rowin .3s var(--ease-expo) both}
+.msg.sys{align-self:center;max-width:none;color:var(--c-label);margin:6px 0}
+.typing p{display:flex;gap:4px;padding:13px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--c-vinyl);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,60%,100%{opacity:.2}30%{opacity:1}}
+.meet{align-self:stretch;border:1px solid var(--c-vinyl);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;background:repeating-linear-gradient(-45deg,transparent 0 7px,rgba(15,15,14,.04) 7px 8px)}
+.meet .k{color:var(--c-label)}
+.meet b{font:800 30px/.9 var(--ff-display);text-transform:uppercase}
+.meet .w{font:500 13.5px/1.35 var(--ff-text)}
+.meet .acts{display:flex;gap:8px}
+.meet .acts button{flex:1;height:36px;border-radius:99px;border:1px solid var(--c-vinyl);font:600 13px/1 var(--ff-text)}
+.meet .acts .ok{background:var(--c-vinyl);color:var(--c-paper)}
+.meet.is-ok .acts{display:none}
+.quick{flex:none;display:flex;gap:6px;overflow-x:auto;padding:6px 14px 8px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.quick button{border:1px solid var(--c-line);border-radius:99px;padding:8px 11px;white-space:nowrap;font:500 12.5px/1 var(--ff-text);transition:border-color .2s}
+.quick button:hover{border-color:var(--c-vinyl)}
+.composer{flex:none;display:flex;gap:8px;align-items:center;padding:8px 14px 32px;border-top:1px solid var(--c-line)}
+.composer input{flex:1;height:44px;border-radius:99px;border:1px solid var(--c-vinyl);background:transparent;padding:0 16px;font:500 16px/1 var(--ff-text);outline:none}
+.composer input:focus{border-color:var(--c-label)}
+.composer button{height:44px;padding:0 16px;border-radius:99px;background:var(--c-label);font:600 13px/1 var(--ff-text)}
+
+/* ───────── page cursor (fine pointers only) ───────── */
+.cursor{position:fixed;left:0;top:0;z-index:1000;pointer-events:none;mix-blend-mode:difference;color:#fff;display:none}
+html.has-cursor .cursor{display:block}
+html.has-cursor,html.has-cursor *{cursor:none !important}
+.cursor i{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:currentColor;transition:transform .35s var(--ease),background .25s,border .25s}
+.cursor.is-touch i{transform:scale(4);background:transparent;border:.5px solid currentColor}
+.cursor.is-hover i{transform:scale(5);background:currentColor}
+.cursor.is-down i{transform:scale(3.2)}
+.cursor b{position:absolute;transform:translate(18px,12px);font:500 10px/1 var(--ff-mono);letter-spacing:.08em;white-space:nowrap;opacity:0;transition:opacity .2s}
+.cursor.has-label b{opacity:1}
+.cursor.is-touch b,.cursor.is-hover b{transform:translate(28px,14px)}
+
+@media (max-width:899px){
+  .deck-head{grid-template-columns:1fr;padding:22px 16px 16px}
+  .deck-meta{align-items:flex-start;text-align:left}
+  .rack{padding:28px 16px 40px;gap:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+
+<header class="deck-head">
+  <div>
+    <h1 class="disp">Spin Swap<sup>Main screens / v1</sup></h1>
+    <p class="tag serif">Your block is a record. Every swap is one play, needle drop to run-out.</p>
+  </div>
+  <div class="deck-meta mono">
+    <span><b>[1–4]</b> focus phone · <b>[← →]</b> onboarding steps</span>
+    <span><b>[M]</b> mono mode · <b>[Esc]</b> close sheet</span>
+    <span>390 × 844 · A.D.2026.10.28</span>
+    <button class="fit-btn mono" id="fit" aria-pressed="true">Fit to screen</button>
+  </div>
+</header>
+
+<div class="rack-wrap" id="rackWrap">
+<div class="rack" id="rack">
+
+<!-- ═════════ (01) ONBOARDING ═════════ -->
+<section class="slot" id="s1" aria-label="Screen 1: onboarding">
+  <div class="cap"><span class="n mono">(01)</span><h2 class="disp">Onboarding</h2><p>Drag the tonearm onto the record to enter. Each step is a track, and the arm moves one groove inward as you go.</p></div>
+  <div class="phone" id="p1" data-cursor="drag">
+    <div class="island"></div>
+    <div class="sbar" style="color:var(--c-paper)"><span>9:41</span><span class="r">5G ▮▮▮ 82%</span></div>
+    <div class="scr" id="ob">
+      <div class="topbar ob-top mono"><span>Spin Swap Club · SE15</span><button class="skip link" id="obSkip">( Skip )</button></div>
+      <div class="ob-stage" id="obStage">
+        <canvas id="obCanvas" aria-hidden="true"></canvas>
+        <div class="arm-base"></div>
+        <div class="arm" id="arm"><div class="arm-rod"></div><div class="arm-head" id="armHead" data-cursor="drag the arm" role="presentation"></div></div>
+        <div class="ob-rpm mono"><b id="obRpm">00.0</b> rpm</div>
+        <div class="ob-hint mono"><em>↗</em> Drag the arm<br>onto the record</div>
+      </div>
+      <div class="ob-panel" id="obPanel">
+        <!-- gate -->
+        <div class="ob-step ob-gate is-on" data-step="0">
+          <h3 class="word disp" aria-label="Spin Swap"><span>Spin</span><span>Swap</span></h3>
+          <p class="tag serif">Trade records with the people on your street.</p>
+          <div class="ob-foot">
+            <button class="btn" id="dropBtn">[ Drop the needle ] <span class="arr">↓</span></button>
+            <div class="row mono"><span>Members 1,284</span><span>Records in rotation 9,410</span></div>
+          </div>
+        </div>
+        <!-- A1 -->
+        <div class="ob-step" data-step="1">
+          <div class="ob-track mono"><span class="on">A1 Block</span><span>A2 Crate</span><span>A3 First spin</span></div>
+          <h3 class="ob-title disp" data-scr>Where's your<br>block?</h3>
+          <div class="field"><label class="mono" for="pc">Postcode</label><input id="pc" value="SE15 4QL" autocomplete="postal-code"></div>
+          <div class="radius" role="group" aria-label="Swap radius">
+            <button aria-pressed="false" data-r="300"><i style="--m:5px"></i><span class="mono">300 m</span></button>
+            <button aria-pressed="true" data-r="800"><i style="--m:9.5px"></i><span class="mono">800 m</span></button>
+            <button aria-pressed="false" data-r="2000"><i style="--m:14px"></i><span class="mono">2 km</span></button>
+          </div>
+          <div class="ob-foot">
+            <div class="row mono"><span id="obMembers">47 members</span><span id="obRecs">312 records in reach</span></div>
+            <button class="btn" data-next>Next track <span class="arr">→</span></button>
+          </div>
+        </div>
+        <!-- A2 -->
+        <div class="ob-step" data-step="2">
+          <div class="ob-track mono"><span>A1 Block</span><span class="on">A2 Crate</span><span>A3 First spin</span></div>
+          <h3 class="ob-title disp" data-scr>What's in<br>your crate?</h3>
+          <div class="chips" id="obGenres"></div>
+          <div class="ob-foot">
+            <div class="row mono"><span id="obPicked">0 picked</span><span>Pick 3 or more</span></div>
+            <button class="btn" data-next id="a2Next" disabled>Next track <span class="arr">→</span></button>
+          </div>
+        </div>
+        <!-- A3 -->
+        <div class="ob-step" data-step="3">
+          <div class="ob-track mono"><span>A1 Block</span><span>A2 Crate</span><span class="on">A3 First spin</span></div>
+          <h3 class="ob-title disp" data-scr>Your first spin</h3>
+          <div class="search"><div class="field"><label class="mono" for="obq">Artist or title</label><input id="obq" placeholder="Search…" autocomplete="off"></div><button class="scan mono">( Scan barcode )</button></div>
+          <ul class="results" id="obResults"></ul>
+          <div class="ob-foot">
+            <button class="btn accent" id="enterBtn" disabled>Enter the club <span class="arr">→</span></button>
+          </div>
+        </div>
+        <!-- run-out -->
+        <div class="ob-step ob-welcome" data-step="4">
+          <div class="ob-track mono"><span>Run-out groove</span></div>
+          <h3 class="ob-title disp" data-scr>You're on<br>the record.</h3>
+          <p class="serif" style="font-size:22px;line-height:1.1">47 neighbours, 312 records. First crate's loading.</p>
+          <div class="ob-foot"><button class="btn" id="toHome">Open the crate <span class="arr">→</span></button></div>
+        </div>
+      </div>
+    </div>
+    <div class="homebar" style="color:var(--c-vinyl)"></div>
+  </div>
+  <div class="states mono" data-for="1">
+    <button aria-pressed="true" data-st="0">Gate</button><button data-st="1">A1</button><button data-st="2">A2</button><button data-st="3">A3</button>
+    <span class="haptic" id="h1"><i></i><b>Haptic</b></span>
+  </div>
+</section>
+
+<!-- ═════════ (02) HOME ═════════ -->
+<section class="slot" id="s2" aria-label="Screen 2: home and browse">
+  <div class="cap"><span class="n mono">(02)</span><h2 class="disp">Home · the crate</h2><p>Scroll the crate and the top sleeve lifts into the window. Fast flicks tilt the stack. GROOVE shows the same records on distance rings.</p></div>
+  <div class="phone" id="p2">
+    <div class="island"></div>
+    <div class="sbar"><span>9:41</span><span class="r">5G ▮▮▮ 82%</span></div>
+    <div class="scr">
+      <div class="topbar h-top mono">
+        <span class="loc"><b>●</b> SE15 · <span id="hRad">800 m</span> · 47 members</span>
+        <div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-view="crate">(Crate)</button><button aria-pressed="false" data-view="groove">(Groove)</button></div>
+      </div>
+      <div class="h-title">
+        <h3 class="disp" id="hTitle">Crate<sup id="hCount">11</sup></h3>
+        <button class="redig mono link" id="redig">↻ Re-dig</button>
+      </div>
+      <div class="h-body">
+        <div class="h-view" id="vCrate">
+          <div class="pv" id="pv" data-cursor="open" role="button" tabindex="0" aria-label="Open lifted record">
+            <div class="pv-art"><div class="disc-wrap"><div class="disc" id="pvDisc"><div class="disc-lbl"><div><b id="pvLbl">A</b></div></div></div><div class="disc-sheen"></div></div><div id="pvCover"></div></div>
+            <div class="pv-meta">
+              <span class="idx mono" id="pvIdx">001 / 011</span>
+              <span class="art serif" id="pvArt"></span>
+              <h4 class="disp" id="pvTitle"></h4>
+              <div class="m mono" id="pvMeta"></div>
+            </div>
+          </div>
+          <div class="filters" id="filters" role="group" aria-label="Genre"></div>
+          <div class="list has-lift" id="list" tabindex="0" aria-label="Records nearby"><div class="list-in" id="listIn"></div></div>
+          <div class="empty" id="empty" hidden>
+            <div class="rings"></div>
+            <p class="serif">Nothing on this groove yet.</p>
+            <span class="mono" style="color:var(--c-sub)">No <span id="emGenre">folk</span> within 800 m</span>
+            <button class="btn" id="widen">[ Widen to 2 km ] <span class="arr">↗</span></button>
+          </div>
+        </div>
+        <div class="h-view" id="vGroove" hidden>
+          <div class="groove">
+            <div class="g-map" id="gmap">
+              <div class="g-sweep" id="gsweep"></div>
+              <div class="g-ring" style="width:118px;height:118px"><span class="mono">300 m</span></div>
+              <div class="g-ring" style="width:236px;height:236px"><span class="mono">800 m</span></div>
+              <div class="g-ring" style="width:350px;height:350px"><span class="mono">2 km</span></div>
+              <div class="g-you">You</div>
+            </div>
+            <div class="g-card" id="gcard"><span class="hint mono">Tap a record on a groove</span></div>
+          </div>
+        </div>
+      </div>
+      <nav class="tabs mono" aria-label="Main">
+        <button class="on" aria-current="page">Crate</button>
+        <button>Swaps<sup>2</sup></button>
+        <button class="spin"><em>+</em> Spin</button>
+        <button>Sleeve</button>
+      </nav>
+    </div>
+    <div class="homebar"></div>
+  </div>
+  <div class="states mono" data-for="2">
+    <button aria-pressed="true" data-st="crate">Crate</button><button data-st="groove">Groove</button><button data-st="empty">Empty</button>
+    <span class="haptic" id="h2"><i></i><b>Haptic</b></span>
+  </div>
+</section>
+
+<!-- ═════════ (03) DETAIL ═════════ -->
+<section class="slot" id="s3" aria-label="Screen 3: record detail">
+  <div class="cap"><span class="n mono">(03)</span><h2 class="disp">Record detail</h2><p>The disc slides out of its sleeve. Drag it to scratch, flip between side A and side B, then propose a swap from the bottom.</p></div>
+  <div class="phone" id="p3">
+    <div class="island"></div>
+    <div class="sbar"><span>9:41</span><span class="r">5G ▮▮▮ 82%</span></div>
+    <div class="scr" id="dScr">
+      <div class="topbar mono"><button class="link" id="dBack">← Crate</button><span id="dId" style="color:var(--c-sub)">SS·0142</span><button class="link" id="dSave" aria-pressed="false">( Save )</button></div>
+      <div class="d-scroll" id="dScroll">
+        <div class="d-stage" id="dStage">
+          <div class="disc-wrap" id="dDiscWrap" data-cursor="scratch"><div class="disc" id="dDisc"><div class="disc-lbl" id="dLbl"><div><b id="dLblT">Side A</b><span id="dLblS"></span></div></div></div><div class="disc-sheen"></div></div>
+          <div id="dCover"></div>
+          <span class="flag rpm mono"><b id="dRpm">33⅓</b> rpm</span>
+          <span class="flag scr-hint mono">Drag to scratch ↻</span>
+        </div>
+        <div class="d-head">
+          <p class="art serif" id="dArt"></p>
+          <h3 class="disp" id="dTitle"></h3>
+          <div class="m mono" id="dMeta"></div>
+        </div>
+        <div class="d-sec">
+          <div class="d-sec-h"><span class="mono">Tracklist</span><div class="sides mono" role="group" aria-label="Side"><button aria-pressed="true" data-side="A">(A)</button><button aria-pressed="false" data-side="B">(B)</button></div></div>
+          <div class="tracks"><ol id="dTracks"></ol></div>
+        </div>
+        <div class="d-sec">
+          <div class="d-sec-h"><span class="mono">This copy</span><span class="mono" style="color:var(--c-sub)">Graded by owner</span></div>
+          <dl id="dSpecs"></dl>
+        </div>
+        <div class="d-sec">
+          <div class="owner" id="dOwner"></div>
+        </div>
+      </div>
+      <div class="d-cta">
+        <button class="btn accent" id="propose">Propose a swap <span class="arr">→</span></button>
+        <div class="row2 mono"><span>3 of yours qualify</span><span>Meet in public · always</span></div>
+      </div>
+      <div class="veil" id="veil"></div>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT">
+        <div class="grab"></div>
+        <div class="sub mono"><span>Your offer</span><button class="link" id="shClose">( Close · Esc )</button></div>
+        <h4 class="disp" id="shT">What do you<br>bring?</h4>
+        <div class="mine" id="mine" role="radiogroup" aria-label="Your records"></div>
+        <textarea id="shNote" aria-label="Note">Happy to meet at the station Saturday morning.</textarea>
+        <button class="btn" id="sendOffer">Send offer <span class="arr">→</span></button>
+      </div>
+    </div>
+    <div class="homebar"></div>
+  </div>
+  <div class="states mono" data-for="3">
+    <button aria-pressed="true" data-st="A">Side A</button><button data-st="B">Side B</button><button data-st="sheet">Offer sheet</button><button data-st="replay">↻ Replay entry</button>
+    <span class="haptic" id="h3"><i></i><b>Haptic</b></span>
+  </div>
+</section>
+
+<!-- ═════════ (04) CHAT ═════════ -->
+<section class="slot" id="s4" aria-label="Screen 4: trade chat">
+  <div class="cap"><span class="n mono">(04)</span><h2 class="disp">Trade chat</h2><p>Kept quiet on purpose. A needle dot moves along PROPOSED → SPUN, and when both agree the two records swap places in the card.</p></div>
+  <div class="phone" id="p4">
+    <div class="island"></div>
+    <div class="sbar"><span>9:41</span><span class="r">5G ▮▮▮ 82%</span></div>
+    <div class="scr">
+      <div class="topbar c-top">
+        <button class="mono link">←</button>
+        <div class="who"><div class="disc-wrap" style="--lbl:var(--c-label)"><div class="disc"><div class="disc-lbl"><div><b id="cIni">MT</b></div></div></div></div>
+          <div><b id="cName">Mika T.</b><div class="mono" id="cMeta">240 m · 31 swaps · replies ~1 h</div></div></div>
+        <button class="mono link" aria-label="More: report or block">( ··· )</button>
+      </div>
+      <div class="offer" id="offer">
+        <div class="offer-h mono"><span>Swap <b id="oId">#SW-0381</b></span><span id="oWhen">Sent 18:09</span></div>
+        <div class="ex">
+          <div class="ex-side"><span class="k mono" id="oKL">You give</span><div class="ex-art" id="oGiveArt"></div><span class="t" id="oGive"></span><span class="g mono" id="oGiveG"></span></div>
+          <div class="ex-mid">⇄</div>
+          <div class="ex-side r"><span class="k mono" id="oKR">You get</span><div class="ex-art" id="oGetArt"></div><span class="t" id="oGet"></span><span class="g mono" id="oGetG"></span></div>
+        </div>
+        <div class="stat" id="stat"><div class="fillln" id="statFill"></div><div class="needle" id="needle"></div>
+          <ol><li class="done">Proposed</li><li>Agreed</li><li>Meet</li><li>Spun</li></ol></div>
+        <div class="offer-act"><button class="ag" id="agree">Agree</button><button id="counter">Counter</button></div>
+        <div class="offer-done mono"><span id="doneTxt">Both agreed · 18:12</span><button class="link">( Cancel swap )</button></div>
+      </div>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+      <div class="quick" id="quick">
+        <button>Still available?</button><button>Can I see the vinyl first?</button><button>Saturday works</button><button>I'll bring a sleeve</button>
+      </div>
+      <form class="composer" id="composer" autocomplete="off"><input id="cIn" placeholder="Message Mika…" aria-label="Message"><button type="submit">Send</button></form>
+    </div>
+    <div class="homebar"></div>
+  </div>
+  <div class="states mono" data-for="4">
+    <button aria-pressed="true" data-st="proposed">Proposed</button><button data-st="agreed">Agreed</button><button data-st="typing">Typing</button>
+    <span class="haptic" id="h4"><i></i><b>Haptic</b></span>
+  </div>
+</section>
+
+</div>
+</div>
+
+<div class="cursor" id="cursor" aria-hidden="true"><i></i><b></b></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function fitText(el, base, min = 22) { let fs = base; el.style.fontSize = fs + 'px'; while (el.scrollWidth > el.clientWidth + 1 && fs > min) { fs -= 2; el.style.fontSize = fs + 'px'; } }
+
+/* ── data: real records, placeholder sleeve art ── */
+const ART = {
+  sun:(a,b)=>`radial-gradient(circle at 60% 42%, ${b} 0 27%, transparent 27.6%), ${a}`,
+  bands:(a,b)=>`repeating-linear-gradient(180deg, ${a} 0 9%, ${b} 9% 10.4%)`,
+  split:(a,b)=>`radial-gradient(circle at 30% 68%, ${a} 0 13%, transparent 13.5%), linear-gradient(135deg, ${a} 0 50%, ${b} 50%)`,
+  dots:(a,b)=>`radial-gradient(circle, ${b} 0 22%, transparent 24%) 0 0/20% 20%, ${a}`,
+  rings:(a,b)=>`repeating-radial-gradient(circle at 50% 110%, ${a} 0 5%, ${b} 5% 6.2%)`,
+  block:(a,b)=>`linear-gradient(${b},${b}) 14% 16%/44% 58% no-repeat, linear-gradient(${b},${b}) 74% 82%/18% 18% no-repeat, ${a}`,
+  diag:(a,b)=>`repeating-linear-gradient(-45deg, ${a} 0 8%, ${b} 8% 9.5%)`,
+  half:(a,b)=>`radial-gradient(circle at 50% 58%, ${b} 0 20%, transparent 20.5%), linear-gradient(${a} 0 58%, ${b} 58%)`,
+  arc:(a,b)=>`radial-gradient(circle at 0% 100%, ${b} 0 58%, transparent 58.5%), ${a}`,
+  grid:(a,b)=>`linear-gradient(${b} 1.5px, transparent 1.5px) 0 0/12.5% 12.5%, linear-gradient(90deg, ${b} 1.5px, transparent 1.5px) 0 0/12.5% 12.5%, ${a}`,
+};
+const R = [
+ {id:'0142',title:'Journey in Satchidananda',artist:'Alice Coltrane',year:1971,label:'Impulse!',cat:'AS-9203',press:'US original',genre:'Jazz',dist:240,owner:'Mika T.',swaps:31,media:'NM',sleeve:'VG+',art:['sun','#b8412a','#f1b84a','#f6ecd8'],
+  A:['Journey in Satchidananda','Shiva-Loka','Stopover Bombay'],B:['Something About John Coltrane','Isis and Osiris'],note:'Found at a church sale in Margate, 2019. One soft hairline on B1, plays silent.'},
+ {id:'0133',title:'Remain in Light',artist:'Talking Heads',year:1980,label:'Sire',cat:'SRK 6095',press:'US original',genre:'Post-punk',dist:90,owner:'Jonah B.',swaps:12,media:'VG+',sleeve:'VG',art:['block','#c1272d','#1a1a1a','#f3e9dc'],
+  A:['Born Under Punches (The Heat Goes On)','Crosseyed and Painless','The Great Curve'],B:['Once in a Lifetime','Houses in Motion','Seen and Not Seen','Listening Wind','The Overload'],note:'Seam split taped on the inside. Vinyl is lovely.'},
+ {id:'0127',title:"What's Going On",artist:'Marvin Gaye',year:1971,label:'Tamla',cat:'TS 310',press:'US original',genre:'Soul',dist:120,owner:'Sam K.',swaps:8,media:'VG',sleeve:'VG',art:['diag','#3d5a6c','#8fa9b5','#f2efe6'],
+  A:["What's Going On","What's Happening Brother","Flyin' High (In the Friendly Sky)",'Save the Children','God Is Love','Mercy Mercy Me (The Ecology)'],B:['Right On','Wholy Holy','Inner City Blues (Make Me Wanna Holler)'],note:'Dad\'s copy. Light crackle in the run-in, then warm.'},
+ {id:'0147',title:'Heaven or Las Vegas',artist:'Cocteau Twins',year:1990,label:'4AD',cat:'CAD 0012',press:'UK original',genre:'Dream pop',dist:300,owner:'Tomasz W.',swaps:19,media:'NM',sleeve:'NM',art:['grid','#e6b9c8','#8d4a6b','#3b1e2b'],
+  A:['Cherry-Coloured Funk','Pitch the Baby','Iceblink Luck','Fifty-Fifty Clown','Heaven or Las Vegas'],B:['I Wear Your Ring','Fotzepolitic','Wolf in the Breast','Road, River and Rail','Frou-Frou Foxes in Midsummer Fires'],note:'Played maybe five times. Inner sleeve included.'},
+ {id:'0151',title:'Karma',artist:'Pharoah Sanders',year:1969,label:'Impulse!',cat:'AS-9181',press:'US reissue',genre:'Jazz',dist:380,owner:'Ola A.',swaps:24,media:'VG+',sleeve:'VG+',art:['rings','#2a4d3a','#d9c37a','#f5eed8'],
+  A:['The Creator Has a Master Plan (Pt. 1)'],B:['The Creator Has a Master Plan (Pt. 2)','Colors'],note:'Gatefold, small ring wear on the back.'},
+ {id:'0129',title:'Trans-Europe Express',artist:'Kraftwerk',year:1977,label:'Parlophone',cat:'',press:'2009 remaster',genre:'Electronic',dist:440,owner:'Rui C.',swaps:6,media:'NM',sleeve:'NM',art:['dots','#1c2c4a','#e7e4dc','#e7e4dc'],
+  A:['Europe Endless','The Hall of Mirrors','Showroom Dummies'],B:['Trans-Europe Express','Metal on Metal','Franz Schubert','Endless Endless'],note:'Heavyweight press, booklet intact.'},
+ {id:'0119',title:'Unknown Pleasures',artist:'Joy Division',year:1979,label:'Factory',cat:'FACT 10',press:'UK repress',genre:'Post-punk',dist:520,owner:'Lou F.',swaps:15,media:'VG+',sleeve:'VG+',art:['bands','#121212','#d8d4c8','#d8d4c8'],
+  A:['Disorder','Day of the Lords','Candidate','Insight','New Dawn Fades'],B:["She's Lost Control",'Shadowplay','Wilderness','Interzone','I Remember Nothing'],note:'Textured sleeve, slight corner bump.'},
+ {id:'0138',title:'Kind of Blue',artist:'Miles Davis',year:1959,label:'Columbia',cat:'CS 8163',press:'US 2-eye repress',genre:'Jazz',dist:610,owner:'Dev R.',swaps:40,media:'VG+',sleeve:'VG',art:['half','#1f3b5c','#e9e2d0','#e9e2d0'],
+  A:['So What','Freddie Freeloader','Blue in Green'],B:['All Blues','Flamenco Sketches'],note:'Writing on the back cover (old owner\'s name). Plays great.'},
+ {id:'0155',title:'Ambient 1: Music for Airports',artist:'Brian Eno',year:1978,label:'Polydor',cat:'AMB 001',press:'UK original',genre:'Electronic',dist:680,owner:'Ama O.',swaps:22,media:'NM',sleeve:'VG+',art:['split','#d7dcd9','#7f8c89','#2d3533'],
+  A:['1/1','2/1'],B:['1/2','2/2'],note:'Quiet pressing, ideal for this record.'},
+ {id:'0160',title:'Innervisions',artist:'Stevie Wonder',year:1973,label:'Tamla',cat:'T 326L',press:'US original',genre:'Soul',dist:750,owner:'Priya N.',swaps:17,media:'NM',sleeve:'NM',art:['arc','#c9622e','#2b2016','#f4e3cf'],
+  A:['Too High','Visions','Living for the City','Golden Lady'],B:['Higher Ground','Jesus Children of America','All in Love Is Fair',"Don't You Worry 'bout a Thing","He's Misstra Know-It-All"],note:'Barely played. Lyric inner present.'},
+ {id:'0164',title:'Zombie',artist:'Fela Kuti & Afrika 70',year:1976,label:'Knitting Factory',cat:'',press:'2013 reissue',genre:'Afro',dist:790,owner:'Bisi A.',swaps:9,media:'VG+',sleeve:'VG+',art:['block','#e3a21a','#1b1b1b','#1b1b1b'],
+  A:['Zombie'],B:['Mr. Follow Follow'],note:'Loud, clean, ready for a party.'},
+ {id:'0171',title:'Blue',artist:'Joni Mitchell',year:1971,label:'Reprise',cat:'MS 2038',press:'US original',genre:'Folk',dist:1600,owner:'Hal M.',swaps:5,media:'VG',sleeve:'VG',art:['half','#24466e','#9cb7d3','#e9eef4'],
+  A:['All I Want','My Old Man','Little Green','Carey','Blue'],B:['California','This Flight Tonight','River','A Case of You','The Last Time I Saw Richard'],note:'Well loved. Some surface noise on A1, River is perfect.'},
+];
+const MINE = [
+  {title:'Come to My Garden',artist:'Minnie Riperton',media:'VG+',sleeve:'VG',art:['sun','#4d6b3a','#e8b9c4','#f3eee2']},
+  {title:'Head Hunters',artist:'Herbie Hancock',media:'NM',sleeve:'VG+',art:['diag','#1b1b1b','#d4a12a','#f3eee2']},
+  {title:'Diamond Life',artist:'Sade',media:'VG',sleeve:'VG',art:['arc','#ece6da','#b38b5d','#2a2420']},
+];
+const GENRES = ['Jazz','Soul','Post-punk','Electronic','Dream pop','Afro','Folk'];
+const lblColor = r => r.art[2];
+const fmtDist = d => d >= 1000 ? (d/1000).toFixed(1) + ' km' : d + ' m';
+const ini = n => n.split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function cover(r, px, extra = '') {
+  const [t,a,b,fg] = r.art;
+  return `<div class="cv ${px < 70 ? 'sm' : ''} ${extra}" style="--s:${px}px;--fg:${fg};background:${ART[t](a,b)}" aria-hidden="true"><span class="cv-n">${r.year || ''}</span><span class="cv-t">${esc(r.artist)}</span></div>`;
+}
+function disc(r, label = '', sub = '') {
+  return `<div class="disc" style="--lbl:${lblColor(r)}"><div class="disc-lbl"><div><b>${esc(label)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div></div></div><div class="disc-sheen"></div>`;
+}
+
+/* ── shared: ticker, haptic, scramble ── */
+const tickers = new Set(); let lastT = performance.now();
+function raf(now){ const dt = Math.min(.05, (now - lastT) / 1000); lastT = now; tickers.forEach(f => f(dt, now)); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+document.addEventListener('visibilitychange', () => { lastT = performance.now(); });
+
+function haptic(n, kind = 'light') {
+  const el = $('#h' + n); if (!el) return;
+  el.querySelector('b').textContent = kind === 'medium' ? 'Medium' : kind === 'tick' ? 'Tick' : 'Light';
+  el.classList.remove('is-on'); void el.offsetWidth; el.classList.add('is-on');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('is-on'), kind === 'medium' ? 260 : 140);
+  try { navigator.vibrate && navigator.vibrate(kind === 'medium' ? 18 : 6); } catch (e) {}
+}
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=/<>';
+function scramble(el, dur = 520) {
+  const html = el.dataset.html || el.innerHTML; el.dataset.html = html;
+  const final = el.textContent; el.setAttribute('aria-label', final.replace(/\s+/g,' '));
+  if (reduce) return;
+  const start = performance.now();
+  const lines = html.split(/<br\s*\/?>/i).map(s => s.replace(/<[^>]+>/g,''));
+  (function frame(now){
+    const p = Math.min(1, (now - start) / dur);
+    el.innerHTML = lines.map(line => { const rev = Math.floor(p * line.length);
+      return [...line].map((c,i) => i < rev || c === ' ' ? esc(c) : GLYPHS[(Math.random()*GLYPHS.length)|0]).join(''); }).join('<br>');
+    if (p < 1) requestAnimationFrame(frame); else el.innerHTML = html;
+  })(start);
+}
+function localPoint(e, el) { // pointer → element-local, unscaled (works with CSS zoom / transforms)
+  const r = el.getBoundingClientRect(); const s = r.width / el.offsetWidth || 1;
+  return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s };
+}
+function setStates(n, v) { $$(`.states[data-for="${n}"] button`).forEach(b => b.setAttribute('aria-pressed', b.dataset.st === String(v))); }
+function focusSlot(n) {
+  const s = $('#s' + n); s.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+  s.classList.add('is-flash'); setTimeout(() => s.classList.remove('is-flash'), 700);
+}
+
+/* ═════════ (01) ONBOARDING ═════════ */
+const OB = (() => {
+  const stage = $('#obStage'), cv = $('#obCanvas'), ctx = cv.getContext('2d');
+  const arm = $('#arm'), head = $('#armHead'), scr = $('#ob');
+  const W = 390, H = 320, CX = 168, CY = 164, RAD = 142, LR = 46, PX = 356, PY = 34, L = 262;
+  const dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr;
+  // pre-render grooves once
+  const off = document.createElement('canvas'); const S = Math.ceil(RAD * 2 * dpr); off.width = off.height = S;
+  { const o = off.getContext('2d'); o.scale(dpr, dpr); const c = RAD;
+    o.fillStyle = '#0d0d0c'; o.beginPath(); o.arc(c, c, RAD, 0, Math.PI * 2); o.fill();
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let r = LR + 8; r < RAD - 3; r += .85) {
+      const gap = [70, 92, 112, 130].some(g => Math.abs(r - g) < 1.2);
+      const l = gap ? 3 : 10 + rnd() * 9;
+      o.strokeStyle = `hsl(40 3% ${l}%)`; o.lineWidth = gap ? 1.6 : .5;
+      o.beginPath(); o.arc(c, c, r, 0, Math.PI * 2); o.stroke();
+    }
+    o.strokeStyle = 'rgba(231,228,220,.22)'; o.lineWidth = 1; o.beginPath(); o.arc(c, c, RAD - .5, 0, Math.PI * 2); o.stroke();
+    o.fillStyle = '#050505'; o.beginPath(); o.arc(c, c, LR + 6, 0, Math.PI * 2); o.fill();
+  }
+  // tonearm geometry: angle (deg) that puts the stylus at radius r
+  const headAt = th => { const t = th * Math.PI / 180; return { x: PX - Math.sin(t) * L, y: PY + Math.cos(t) * L }; };
+  const radAt = th => { const h = headAt(th); return Math.hypot(h.x - CX, h.y - CY); };
+  const angFor = r => { let a = 0, b = 45; for (let i = 0; i < 30; i++) { const m = (a + b) / 2; radAt(m) > r ? a = m : b = m; } return (a + b) / 2; };
+  const STEP_R = [null, 132, 114, 96, 68];
+  const LBL = ['Side A', 'A1', 'A2', 'A3', 'Run-out'];
+
+  let step = 0, dropped = false, theta = 0, thetaT = 0, dragging = false;
+  let rot = 0, speed = 0, speedT = 0, sheenA = -0.6, sheenT = -0.6;
+
+  function draw() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.arc(CX + 3, CY + 6, RAD, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(CX, CY); ctx.rotate(rot); ctx.drawImage(off, -RAD, -RAD, RAD * 2, RAD * 2);
+    // label (rotates with the disc)
+    ctx.fillStyle = '#ff4a1c'; ctx.beginPath(); ctx.arc(0, 0, LR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0f0f0e'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '800 22px "Big Shoulders Display","TeX Gyre Heros Cn","Arial Narrow",sans-serif';
+    ctx.fillText(LBL[step].toUpperCase(), 0, 2);
+    ctx.font = '500 6.5px "JetBrains Mono","DejaVu Sans Mono",monospace';
+    ctx.fillText('SPIN SWAP CLUB', 0, -24); ctx.fillText('33⅓ · SE15', 0, 25);
+    ctx.strokeStyle = 'rgba(15,15,14,.5)'; ctx.lineWidth = .6; ctx.beginPath(); ctx.arc(0, 0, LR - 5, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#e7e4dc'; ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // sheen: two highlights that face the finger, like light raking the grooves
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, RAD - 1, 0, Math.PI * 2); ctx.arc(CX, CY, LR + 6, 0, Math.PI * 2, true); ctx.clip('evenodd');
+    ctx.globalCompositeOperation = 'lighter';
+    if (ctx.createConicGradient) {
+      const g = ctx.createConicGradient(sheenA - .35, CX, CY);
+      [[0,0],[.05,.19],[.11,0],[.5,0],[.55,.13],[.61,0],[1,0]].forEach(([p,a]) => g.addColorStop(p, `rgba(255,250,240,${a})`));
+      ctx.fillStyle = g;
+    } else {
+      const g = ctx.createLinearGradient(CX - RAD, CY - RAD, CX + RAD, CY + RAD);
+      g.addColorStop(.3, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.08)'); g.addColorStop(.7, 'rgba(255,255,255,0)'); ctx.fillStyle = g;
+    }
+    ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+  tickers.add(dt => {
+    speed += (speedT - speed) * (reduce ? 1 : .025);
+    if (!reduce) rot += speed * dt;
+    sheenA += (((sheenT - sheenA + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * .08;
+    if (!dragging) theta += (thetaT - theta) * (reduce ? 1 : .1);
+    arm.style.transform = `rotate(${theta}deg)`;
+    $('#obRpm').textContent = (speed / (Math.PI * 2) * 60).toFixed(1).padStart(4, '0');
+    draw();
+  });
+
+  scr.addEventListener('pointermove', e => { const p = localPoint(e, stage); sheenT = Math.atan2(p.y - CY, p.x - CX); }, { passive: true });
+
+  head.addEventListener('pointerdown', e => { if (dropped) return; dragging = true; head.setPointerCapture(e.pointerId); e.preventDefault(); });
+  head.addEventListener('pointermove', e => {
+    if (!dragging) return; const p = localPoint(e, stage);
+    theta = clamp(Math.atan2(-(p.x - PX), p.y - PY) * 180 / Math.PI, -4, 40);
+  });
+  const release = () => { if (!dragging) return; dragging = false; radAt(theta) < RAD - 4 ? drop() : (thetaT = 0); };
+  head.addEventListener('pointerup', release); head.addEventListener('pointercancel', release);
+
+  function drop() { if (dropped) return; dropped = true; scr.classList.add('is-dropped'); speedT = 0.55 * Math.PI * 2; haptic(1, 'medium'); go(1); }
+
+  const steps = $$('.ob-step');
+  function go(n, silent) {
+    n = clamp(n, 0, 4);
+    if (n > 0 && !dropped) { dropped = true; scr.classList.add('is-dropped'); speedT = 0.55 * Math.PI * 2; }
+    if (n === 0) { dropped = false; scr.classList.remove('is-dropped'); speedT = 0; thetaT = 0; }
+    else thetaT = angFor(STEP_R[n]);
+    step = n;
+    steps.forEach((s, i) => { s.classList.toggle('is-on', i === n); s.classList.toggle('is-past', i < n); s.inert = i !== n; });
+    const t = steps[n].querySelector('[data-scr]'); if (t) scramble(t);
+    setStates(1, n > 3 ? 3 : n);
+    if (!silent && n > 0) haptic(1, n === 4 ? 'medium' : 'light');
+  }
+  $('#dropBtn').addEventListener('click', () => { thetaT = angFor(STEP_R[1]); drop(); });
+  $$('[data-next]').forEach(b => b.addEventListener('click', () => go(step + 1)));
+  $('#obSkip').addEventListener('click', () => go(3));
+  $('#enterBtn').addEventListener('click', () => go(4));
+  $('#toHome').addEventListener('click', () => focusSlot(2));
+
+  // swipe between steps on the panel
+  let sx = null; const panel = $('#obPanel');
+  panel.addEventListener('pointerdown', e => { if (e.target.closest('input,button')) return; sx = e.clientX; });
+  panel.addEventListener('pointerup', e => { if (sx == null) return; const d = e.clientX - sx; sx = null;
+    if (Math.abs(d) > 50 && step > 0) go(step + (d < 0 ? 1 : -1)); });
+
+  // A1 radius
+  const MEM = { 300: [18, 104], 800: [47, 312], 2000: [163, 1180] };
+  $$('.radius button').forEach(b => b.addEventListener('click', () => {
+    $$('.radius button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    const [m, r] = MEM[b.dataset.r]; tick($('#obMembers'), m, ' members'); tick($('#obRecs'), r, ' records in reach'); haptic(1, 'tick');
+  }));
+  function tick(el, to, suffix) { const from = parseInt(el.textContent.replace(/\D/g,'')) || 0; const t0 = performance.now();
+    (function f(now){ const p = Math.min(1, (now - t0) / 420); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))).toLocaleString('en-GB') + suffix; if (p < 1) requestAnimationFrame(f); })(t0); }
+
+  // A2 genres
+  const G2 = [['Jazz',212],['Soul / Funk',180],['Hip-hop',156],['Electronic',130],['Disco',97],['Post-punk',73],['City pop',64],['Folk',52],['Ambient',41],['Afrobeat',38],['Dub',33],['Library',12]];
+  $('#obGenres').innerHTML = G2.map(([g,c]) => `<button class="chip" aria-pressed="false">${g}<sup>${c}</sup></button>`).join('');
+  $('#obGenres').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return;
+    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'); haptic(1, 'tick');
+    const n = $$('#obGenres [aria-pressed="true"]').length; $('#obPicked').textContent = n + ' picked'; $('#a2Next').disabled = n < 3; });
+
+  // A3 search
+  function renderRes(q = '') {
+    const list = MINE.filter(m => (m.artist + ' ' + m.title).toLowerCase().includes(q.toLowerCase()));
+    $('#obResults').innerHTML = list.map(m => `<li>${cover(m, 38)}<div class="t"><b>${esc(m.title)}</b><span class="serif">${esc(m.artist)}</span></div><button class="mono" aria-pressed="${!!m.added}" data-t="${esc(m.title)}">${m.added ? '✓ In crate' : '+ Add'}</button></li>`).join('')
+      || `<li><span class="mono" style="color:var(--c-sub)">No match. Try ( Scan barcode )</span></li>`;
+  }
+  renderRes();
+  $('#obq').addEventListener('input', e => renderRes(e.target.value));
+  $('#obResults').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+    const m = MINE.find(x => x.title === b.dataset.t); m.added = !m.added; haptic(1, 'light');
+    renderRes($('#obq').value); $('#enterBtn').disabled = !MINE.some(x => x.added); });
+
+  addEventListener('resize', () => {});
+  go(0, true);
+  return { go, get step(){ return step; } };
+})();
+
+/* ═════════ (02) HOME ═════════ */
+const HOME = (() => {
+  const list = $('#list'), inner = $('#listIn'), pv = $('#pv');
+  let radius = 800, genre = 'All', order = R.map((_, i) => i), view = 'crate', lifted = -1, rows = [];
+  const visible = () => order.map(i => R[i]).filter(r => r.dist <= radius && (genre === 'All' || r.genre === genre));
+  const ROW = 62;
+
+  function renderFilters() {
+    const inR = R.filter(r => r.dist <= radius);
+    const all = [['All', inR.length], ...GENRES.map(g => [g, inR.filter(r => r.genre === g).length])];
+    $('#filters').innerHTML = all.map(([g,c]) => `<button class="chip mono" aria-pressed="${g === genre}" data-g="${g}">${g}<sup>${c}</sup></button>`).join('');
+  }
+  function renderList(anim = true) {
+    const v = visible(); rows = v;
+    countTo(v.length);
+    const empty = v.length === 0;
+    $('#empty').hidden = !empty; pv.hidden = empty; list.hidden = empty;
+    if (empty) { $('#emGenre').textContent = genre.toLowerCase(); return; }
+    inner.innerHTML = v.map((r, i) => `<div class="row ${anim ? 'in' : ''}" style="animation-delay:${Math.min(i, 8) * 35}ms" data-i="${i}" data-cursor="lift">
+      <span class="i mono">${String(i + 1).padStart(3, '0')}</span>${cover(r, 40)}
+      <div class="tt"><b>${esc(r.title)}</b><span class="serif">${esc(r.artist)}</span></div>
+      <div class="d mono">${fmtDist(r.dist)}<br>${r.media}</div></div>`).join('');
+    inner.style.paddingBottom = Math.max(0, list.clientHeight - ROW) + 'px';
+    list.scrollTop = 0; lifted = -1; updateLift(true);
+  }
+  let shown = 11;
+  function countTo(n) { const from = shown; shown = n; const t0 = performance.now(); const el = $('#hCount');
+    (function f(now){ const p = Math.min(1, (now - t0) / 380); el.textContent = Math.round(from + (n - from) * p); if (p < 1) requestAnimationFrame(f); })(t0); }
+
+  function setPreview(r, i, total) {
+    pv.classList.add('is-swap');
+    clearTimeout(pv._t);
+    pv._t = setTimeout(() => {
+      $('#pvCover').innerHTML = cover(r, 132);
+      $('#pvDisc').style.setProperty('--lbl', lblColor(r));
+      $('#pvLbl').textContent = r.genre;
+      $('#pvIdx').textContent = `${String(i + 1).padStart(3, '0')} / ${String(total).padStart(3, '0')}`;
+      $('#pvArt').textContent = r.artist;
+      $('#pvTitle').textContent = r.title; fitText($('#pvTitle'), 34);
+      $('#pvMeta').innerHTML = `<span>${fmtDist(r.dist)}</span><span>${r.media}/${r.sleeve}</span><span>${esc(r.owner)}</span>`;
+      requestAnimationFrame(() => pv.classList.remove('is-swap'));
+    }, reduce ? 0 : 140);
+  }
+  function updateLift(force) {
+    const i = clamp(Math.round(list.scrollTop / ROW), 0, rows.length - 1);
+    if (i === lifted && !force) return;
+    lifted = i;
+    $$('.row', inner).forEach((el, k) => el.classList.toggle('is-lift', k === i));
+    if (rows[i]) setPreview(rows[i], i, rows.length);
+    if (!force) haptic(2, 'tick');
+  }
+  // tilt with flick speed
+  let lastTop = 0, tilt = 0;
+  tickers.add(() => {
+    if (view !== 'crate' || list.hidden) return;
+    const v = list.scrollTop - lastTop; lastTop = list.scrollTop;
+    tilt += (clamp(v * .7, -8, 8) - tilt) * .15;
+    if (!reduce) inner.style.transform = Math.abs(tilt) > .05 ? `rotateX(${-tilt}deg)` : '';
+  });
+  list.addEventListener('scroll', () => updateLift(), { passive: true });
+  inner.addEventListener('click', e => { const row = e.target.closest('.row'); if (!row) return; const i = +row.dataset.i;
+    if (i === lifted) open(rows[i]); else { list.scrollTo({ top: i * ROW, behavior: reduce ? 'auto' : 'smooth' }); } });
+  pv.addEventListener('click', () => rows[lifted] && open(rows[lifted]));
+  pv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rows[lifted] && open(rows[lifted]); } });
+  list.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation();
+      list.scrollTo({ top: clamp(lifted + (e.key === 'ArrowDown' ? 1 : -1), 0, rows.length - 1) * ROW, behavior: 'smooth' }); }
+    if (e.key === 'Enter') rows[lifted] && open(rows[lifted]);
+  });
+  function open(r) {
+    haptic(2, 'light');
+    pv.classList.add('is-out');
+    setTimeout(() => pv.classList.remove('is-out'), 800);
+    DETAIL.load(r, true); setTimeout(() => focusSlot(3), 220);
+  }
+  $('#filters').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; genre = b.dataset.g; haptic(2, 'light'); renderFilters(); renderList(); if (view === 'crate') setStates(2, genre === 'Folk' && radius < 1000 ? 'empty' : 'crate'); });
+  $('#widen').addEventListener('click', () => { radius = 2000; $('#hRad').textContent = '2 km'; haptic(2, 'medium'); renderFilters(); renderList(); renderGroove(); setStates(2, 'crate'); });
+  $('#redig').addEventListener('click', () => {
+    order.sort(() => Math.random() - .5); haptic(2, 'medium'); renderList();
+    $$('.row .tt b', inner).forEach(b => scramble(b, 420));
+  });
+
+  // GROOVE view
+  const gmap = $('#gmap'); let gdots = [], gsel = null, sweep = 0;
+  const ringR = d => d <= 300 ? 36 + d / 300 * 22 : d <= 800 ? 59 + (d - 300) / 500 * 56 : 118 + (d - 800) / 1200 * 54;
+  function renderGroove() {
+    $$('.g-dot', gmap).forEach(d => d.remove());
+    gdots = R.filter(r => r.dist <= radius).map((r, i) => {
+      const a = (i * 137.5 + 20) * Math.PI / 180, rr = ringR(r.dist);
+      const b = document.createElement('button'); b.className = 'g-dot disc-wrap'; b.style.cssText = `left:${177 + Math.sin(a) * rr}px;top:${177 - Math.cos(a) * rr}px`;
+      b.setAttribute('aria-label', `${r.title} by ${r.artist}, ${fmtDist(r.dist)}`); b.setAttribute('aria-pressed', 'false'); b.dataset.cursor = 'tap';
+      b.innerHTML = disc(r); b._a = ((a * 180 / Math.PI) % 360 + 360) % 360; b._r = r; gmap.append(b); return b;
+    });
+  }
+  gmap.addEventListener('click', e => { const b = e.target.closest('.g-dot'); if (!b) return;
+    gdots.forEach(d => d.setAttribute('aria-pressed', d === b)); gsel = b._r; haptic(2, 'light');
+    $('#gcard').innerHTML = `${cover(gsel, 46)}<div class="t"><span class="serif">${esc(gsel.artist)}</span><b>${esc(gsel.title)}</b><span class="mono" style="color:var(--c-sub)">${fmtDist(gsel.dist)} · ${gsel.media} · ${esc(gsel.owner)}</span></div><button class="go mono" id="gopen">Open →</button>`;
+    $('#gopen').addEventListener('click', () => open(gsel));
+  });
+  tickers.add(dt => {
+    if (view !== 'groove' || reduce) return;
+    const prev = sweep; sweep = (sweep + dt * 60) % 360; $('#gsweep').style.transform = `rotate(${sweep}deg)`;
+    gdots.forEach(d => { const pass = prev <= sweep ? d._a > prev && d._a <= sweep : d._a > prev || d._a <= sweep;
+      if (pass) { d.classList.add('ping'); setTimeout(() => d.classList.remove('ping'), 260); } });
+  });
+
+  function setView(v) {
+    view = v === 'groove' ? 'groove' : 'crate';
+    $('#vCrate').hidden = view !== 'crate'; $('#vGroove').hidden = view !== 'groove';
+    $$('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
+    const t = $('#hTitle'); t.firstChild.textContent = view === 'crate' ? 'Crate' : 'Groove';
+    $('#redig').style.visibility = view === 'crate' ? 'visible' : 'hidden';
+  }
+  $$('.seg button').forEach(b => b.addEventListener('click', () => { setView(b.dataset.view); setStates(2, b.dataset.view); haptic(2, 'light'); }));
+
+  function state(s) {
+    if (s === 'empty') { radius = 800; $('#hRad').textContent = '800 m'; genre = 'Folk'; setView('crate'); }
+    else if (s === 'groove') { setView('groove'); }
+    else { genre = 'All'; setView('crate'); }
+    renderFilters(); renderList(); renderGroove(); setStates(2, s);
+  }
+  renderFilters(); renderList(false); renderGroove();
+  return { state };
+})();
+
+/* ═════════ (03) DETAIL ═════════ */
+const DETAIL = (() => {
+  const stage = $('#dStage'), wrap = $('#dDiscWrap'), d = $('#dDisc');
+  let rec = R[0], side = 'A', rot = 0, spd = 200, spdT = 200, scratching = false, lastA = 0, vel = 0, playing = null;
+
+  function load(r, animate) {
+    rec = r; side = 'A';
+    $('#dId').textContent = 'SS·' + r.id;
+    $('#dCover').innerHTML = cover(r, 236);
+    d.style.setProperty('--lbl', lblColor(r));
+    $('#dArt').textContent = r.artist;
+    const t = $('#dTitle'); t.setAttribute('aria-label', r.title);
+    t.innerHTML = r.title.split(' ').map(w => `<span class="ch" aria-hidden="true">${esc(w)}</span>`).join(' '); fitText(t, 56, 30);
+    $('#dMeta').innerHTML = `<span>${esc(r.label)}</span><span>${r.year}</span><span>${esc(r.genre)}</span><span>${fmtDist(r.dist)} away</span>`;
+    const grade = g => `<div class="grade">${['M','NM','VG+','VG','G'].map(x => `<span class="${x === g ? 'on' : ''}">${x}</span>`).join('')}</div>`;
+    $('#dSpecs').innerHTML = `
+      <div class="spec dbl"><dt class="mono">Media</dt><dd>${grade(r.media)}</dd></div>
+      <div class="spec"><dt class="mono">Sleeve</dt><dd>${grade(r.sleeve)}</dd></div>
+      <div class="spec"><dt class="mono">Pressing</dt><dd>${esc(r.press)} · ${esc(r.label)}${r.cat ? ' · ' + esc(r.cat) : ''}</dd></div>
+      <div class="spec"><dt class="mono">Owner's note</dt><dd class="etch serif">“${esc(r.note)}”</dd></div>`;
+    $('#dOwner').innerHTML = `<div class="disc-wrap" style="--lbl:var(--c-label)"><div class="disc"><div class="disc-lbl"><div><b>${ini(r.owner)}</b></div></div></div></div>
+      <div class="t"><b>${esc(r.owner)}</b><div class="mono">${fmtDist(r.dist)} · ${r.swaps} swaps · replies ~1 h</div></div><span class="mono" style="color:var(--c-label)">★ 4.9</span>`;
+    renderSide(false); $('#dScroll').scrollTop = 0;
+    $$('.sides button').forEach(b => b.setAttribute('aria-pressed', b.dataset.side === 'A'));
+    if (animate) entry();
+    setStates(3, 'A');
+  }
+  function entry() {
+    stage.classList.remove('is-in'); void stage.offsetWidth;
+    spd = 0; spdT = 200;
+    requestAnimationFrame(() => stage.classList.add('is-in'));
+    if (reduce || !Element.prototype.animate) return;
+    $$('#dTitle .ch').forEach((c, i) => c.animate([{ transform: 'translateY(60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 600, delay: 160 + i * 50, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+  }
+  function renderSide(anim = true) {
+    const ol = $('#dTracks'); const lbl = $('#dLbl');
+    const apply = () => {
+      $('#dLblT').textContent = 'Side ' + side; $('#dLblS').textContent = rec.title.length > 16 ? rec.title.slice(0, 15) + '…' : rec.title;
+      ol.innerHTML = rec[side].map((t, i) => `<li data-cursor="preview"><span class="n mono">${side}${i + 1}</span><span class="t">${esc(t)}</span><span class="p mono">▶ 30s</span></li>`).join('');
+      ol.classList.remove('is-out'); lbl.classList.remove('is-flip'); playing = null; spdT = 200;
+    };
+    if (!anim || reduce) return apply();
+    ol.classList.add('is-out'); lbl.classList.add('is-flip'); setTimeout(apply, 200);
+  }
+  $$('.sides button').forEach(b => b.addEventListener('click', () => setSide(b.dataset.side)));
+  function setSide(s) { if (s === side) return; side = s; $$('.sides button').forEach(b => b.setAttribute('aria-pressed', b.dataset.side === s)); renderSide(); haptic(3, 'light'); setStates(3, s); }
+  $('#dTracks').addEventListener('click', e => { const li = e.target.closest('li'); if (!li) return;
+    if (playing === li) { li.classList.remove('is-play'); li.querySelector('.p').textContent = '▶ 30s'; playing = null; spdT = 200; return; }
+    if (playing) { playing.classList.remove('is-play'); playing.querySelector('.p').textContent = '▶ 30s'; }
+    playing = li; li.classList.add('is-play'); li.querySelector('.p').textContent = '■ Playing'; spdT = 232; haptic(3, 'light'); });
+
+  // spin + scratch (deg/s; 33⅓ rpm = 200 deg/s)
+  tickers.add(dt => {
+    if (!scratching) { spd += (spdT - spd) * (reduce ? 1 : .04); if (!reduce) rot += spd * dt; }
+    d.style.transform = `rotate(${rot}deg)`;
+    $('#dRpm').textContent = scratching ? 'SCR' : spd > 199 && spd < 201 ? '33⅓' : (spd / 6).toFixed(1);
+  });
+  const angOf = e => { const r = wrap.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  wrap.addEventListener('pointerdown', e => { scratching = true; lastA = angOf(e); vel = 0; wrap.setPointerCapture(e.pointerId); e.preventDefault(); });
+  wrap.addEventListener('pointermove', e => { if (!scratching) return; const a = angOf(e); let dA = a - lastA; dA = ((dA + 540) % 360) - 180; rot += dA; vel = dA * 60; lastA = a; });
+  const up = () => { if (!scratching) return; scratching = false; spd = clamp(vel, -900, 900); haptic(3, 'light'); };
+  wrap.addEventListener('pointerup', up); wrap.addEventListener('pointercancel', up);
+
+  // offer sheet
+  const scr = $('#dScr');
+  $('#mine').innerHTML = MINE.map((m, i) => `<label>${cover(m, 44)}<div class="t"><b>${esc(m.title)}</b><span class="serif">${esc(m.artist)}</span></div><span class="mono" style="color:var(--c-sub)">${m.media}</span><input type="radio" name="give" value="${i}" ${i === 0 ? 'checked' : ''}><span class="rd"></span></label>`).join('');
+  $('#mine').addEventListener('change', () => haptic(3, 'tick'));
+  function sheet(open) { scr.classList.toggle('has-sheet', open); $('#sheet').inert = !open; if (open) { haptic(3, 'light'); setTimeout(() => $('#mine input:checked').focus({ preventScroll: true }), 300); } setStates(3, open ? 'sheet' : side); }
+  $('#sheet').inert = true;
+  $('#propose').addEventListener('click', () => sheet(true));
+  $('#veil').addEventListener('click', () => sheet(false));
+  $('#shClose').addEventListener('click', () => sheet(false));
+  $('#sendOffer').addEventListener('click', () => { const give = MINE[+$('#mine input:checked').value]; haptic(3, 'medium'); sheet(false);
+    CHAT.start(give, rec, $('#shNote').value.trim()); setTimeout(() => focusSlot(4), 260); });
+  $('#dBack').addEventListener('click', () => focusSlot(2));
+  $('#dSave').addEventListener('click', e => { const on = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', on); e.currentTarget.textContent = on ? '( ● Saved )' : '( Save )'; haptic(3, 'light'); });
+
+  function state(s) { if (s === 'sheet') sheet(true); else if (s === 'replay') { sheet(false); entry(); setStates(3, side); } else { sheet(false); setSide(s); setStates(3, s); } }
+  load(R[0], false); stage.classList.add('is-in');
+  return { load, state, closeSheet: () => sheet(false), isOpen: () => scr.classList.contains('has-sheet') };
+})();
+
+/* ═════════ (04) CHAT ═════════ */
+const CHAT = (() => {
+  const msgs = $('#msgs'), offer = $('#offer');
+  let give = MINE[0], get = R[0], stage = 0, replyN = 0;
+  const STAT = [0, 33.3, 66.6, 100];
+  const REPLIES = ["Sounds good. I'll bring it in a sleeve.", 'Saturday 11:00 still okay for you?', 'Great, see you at the station.', "Ha, you'll love side B."];
+
+  function first(n) { return n.split(' ')[0]; }
+  function bubble(who, text, ts, anim = true) {
+    const m = document.createElement('div'); m.className = `msg ${who}${anim ? ' in' : ''}`;
+    m.innerHTML = `<p>${esc(text)}</p><span class="ts mono">${ts}</span>`; msgs.append(m); msgs.scrollTop = msgs.scrollHeight; return m;
+  }
+  function sys(text) { const m = document.createElement('div'); m.className = 'msg sys mono in'; m.textContent = text; msgs.append(m); }
+  function renderOffer(swapped = false) {
+    const L = swapped ? get : give, Rr = swapped ? give : get;
+    $('#oGiveArt').innerHTML = `<div class="disc-wrap">${disc(L)}</div>${cover(L, 56)}`;
+    $('#oGetArt').innerHTML = `<div class="disc-wrap">${disc(Rr)}</div>${cover(Rr, 56)}`;
+    $('#oGive').textContent = L.title; $('#oGiveG').textContent = `${L.media} / ${L.sleeve}`;
+    $('#oGet').textContent = Rr.title; $('#oGetG').textContent = `${Rr.media} / ${Rr.sleeve}`;
+    $('#oKL').textContent = swapped ? 'Yours soon' : 'You give'; $('#oKR').textContent = swapped ? first(get.owner) + "'s soon" : 'You get';
+  }
+  function setStage(n) {
+    stage = n; $('#needle').style.left = STAT[n] + '%'; $('#statFill').style.width = STAT[n] + '%';
+    $$('#stat li').forEach((li, i) => li.classList.toggle('done', i <= n));
+    offer.classList.toggle('is-agreed', n >= 1);
+  }
+  function seed(note) {
+    msgs.innerHTML = '<div class="day mono">— Today · 18:02 —</div>';
+    const o = first(get.owner);
+    bubble('them', `Hey! Saw you've got ${give.title}. Been hunting that one for ages.`, '18:02', false);
+    bubble('me', `It's yours if the ${get.artist.split(' ').pop()} is still around.`, '18:05', false);
+    bubble('them', `Still here. ${get.media} media, sleeve's ${get.sleeve}. Happy to let you play it first.`, '18:06', false);
+    if (note) bubble('me', note, '18:09', false);
+    sys(`— Offer sent · ${give.title} ⇄ ${get.title} —`);
+    $('#cName').textContent = get.owner; $('#cIni').textContent = ini(get.owner);
+    $('#cMeta').textContent = `${fmtDist(get.dist)} · ${get.swaps} swaps · replies ~1 h`;
+    $('#cIn').placeholder = `Message ${o}…`;
+  }
+  function start(g, r, note) { give = g; get = r; renderOffer(false); setStage(0); seed(note); setStates(4, 'proposed'); }
+
+  function agree() {
+    if (stage >= 1) return;
+    haptic(4, 'medium');
+    offer.classList.remove('swapping'); void offer.offsetWidth; offer.classList.add('swapping');
+    setTimeout(() => { renderOffer(true); offer.classList.remove('swapping'); }, reduce ? 0 : 700);
+    setStage(1); $('#doneTxt').textContent = 'Both agreed · 18:12';
+    sys('— Both agreed · 18:12 —');
+    const card = document.createElement('div'); card.className = 'meet in';
+    card.innerHTML = `<span class="k mono">Suggested meet · public place</span><b>Sat 31 Oct · 11:00</b>
+      <span class="w">Peckham Rye station, main entrance. Halfway for you both (4 min / 3 min walk).</span>
+      <div class="acts"><button class="ok">Confirm</button><button>Other time</button></div>`;
+    msgs.append(card); msgs.scrollTop = msgs.scrollHeight;
+    card.querySelector('.ok').addEventListener('click', () => { card.classList.add('is-ok'); setStage(2); haptic(4, 'light'); sys('— Meet confirmed · added to calendar —'); msgs.scrollTop = msgs.scrollHeight; });
+    setStates(4, 'agreed');
+  }
+  $('#agree').addEventListener('click', agree);
+  $('#counter').addEventListener('click', () => { haptic(4, 'light'); focusSlot(3); setTimeout(() => DETAIL.state('sheet'), 450); });
+
+  let typingEl = null;
+  function typing(on) {
+    if (on && !typingEl) { typingEl = document.createElement('div'); typingEl.className = 'msg them typing in'; typingEl.innerHTML = `<p aria-label="${first(get.owner)} is typing"><i></i><i></i><i></i></p><span class="ts mono">${first(get.owner)} is typing</span>`; msgs.append(typingEl); msgs.scrollTop = msgs.scrollHeight; }
+    if (!on && typingEl) { typingEl.remove(); typingEl = null; }
+  }
+  const now = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+  $('#composer').addEventListener('submit', e => { e.preventDefault(); const v = $('#cIn').value.trim(); if (!v) return;
+    typing(false); bubble('me', v, now()); $('#cIn').value = ''; haptic(4, 'light');
+    setTimeout(() => typing(true), 500);
+    setTimeout(() => { typing(false); bubble('them', REPLIES[replyN++ % REPLIES.length], now()); }, 1900); });
+  $('#quick').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $('#cIn').value = b.textContent; $('#cIn').focus(); haptic(4, 'tick'); });
+
+  function state(s) {
+    if (s === 'proposed') start(give, get, $('#shNote').value.trim());
+    else if (s === 'agreed') { if (stage >= 1) start(give, get, $('#shNote').value.trim()); agree(); }
+    else if (s === 'typing') { typing(true); setStates(4, 'typing'); }
+  }
+  start(MINE[0], R[0], 'Sent you the offer. Station on Saturday morning work?');
+  return { start, state };
+})();
+
+/* ── state buttons under each phone ── */
+$$('.states').forEach(g => g.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const st = b.dataset.st;
+  ({ 1: () => OB.go(+st), 2: () => HOME.state(st), 3: () => DETAIL.state(st), 4: () => CHAT.state(st) })[g.dataset.for](); }));
+
+/* ── keyboard ── */
+addEventListener('keydown', e => {
+  if (e.target.closest('input,textarea,[contenteditable]')) { if (e.key === 'Escape') e.target.blur(); return; }
+  if (e.key === 'Escape' && DETAIL.isOpen()) return DETAIL.closeSheet();
+  if (/^[1-4]$/.test(e.key)) return focusSlot(+e.key);
+  if (e.key === 'ArrowRight') return OB.go(Math.min(3, OB.step + 1));
+  if (e.key === 'ArrowLeft') return OB.go(Math.max(0, OB.step - 1));
+  if (e.key === 'm' || e.key === 'M') document.documentElement.classList.toggle('is-mono');
+});
+
+/* ── fit-to-screen (CSS zoom on the rack) ── */
+const rack = $('#rack'), fitBtn = $('#fit'); let fit = true;
+function layout() {
+  const w = innerWidth, natural = 4 * 412 + 3 * 56 + 64;
+  let z = 1;
+  if (w < 900) z = Math.min(1, (w - 32) / 412);
+  else if (fit) z = Math.min(1, (w - 8) / natural);
+  rack.style.zoom = z;
+}
+fitBtn.addEventListener('click', () => { fit = !fit; fitBtn.setAttribute('aria-pressed', fit); layout(); });
+addEventListener('resize', layout); layout();
+
+/* ── page cursor (fine pointers only; phones get a fingertip ring) ── */
+if (fine && !reduce) {
+  document.documentElement.classList.add('has-cursor');
+  const c = $('#cursor'), lbl = c.querySelector('b'); let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
+  addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+  tickers.add(() => { x += (tx - x) * .2; y += (ty - y) * .2; c.style.transform = `translate3d(${x}px,${y}px,0)`; });
+  document.addEventListener('pointerover', e => {
+    const t = e.target.closest('[data-cursor],a,button,input,textarea,label,.row');
+    const inPhone = !!e.target.closest('.phone');
+    c.classList.toggle('is-touch', inPhone);
+    c.classList.toggle('is-hover', !inPhone && !!t);
+    const l = t?.dataset?.cursor || (inPhone ? (t ? 'tap' : '') : '');
+    lbl.textContent = l; c.classList.toggle('has-label', !!l);
+  });
+  addEventListener('pointerdown', () => c.classList.add('is-down'));
+  addEventListener('pointerup', () => c.classList.remove('is-down'));
+  document.addEventListener('pointerleave', () => c.style.opacity = 0);
+  document.addEventListener('pointerenter', () => c.style.opacity = 1);
+}
+})();
+</script>
+</body>
+</html>
