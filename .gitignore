@@ -1,0 +1,13 @@
+# Secrets: never commit these. Set them in Vercel -> Project -> Settings -> Environment Variables.
+.env
+.env.*
+!.env.example
+
+# Vercel / Node / OS / editor
+.vercel/
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
