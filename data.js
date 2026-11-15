@@ -83,11 +83,13 @@ const NEEDS = ['Consulting', 'Full-stack development', 'AI integration & agents'
 
 /* ---------- themes: accent colour + background pattern (picked in the flags menu) ---------- */
 // The first one is the default. mode = which pattern shader.js draws (0 = the original ink field).
+// accent = pattern and button colour. text = a lighter tint of it for small accent-coloured text,
+// chosen to keep at least 4.5:1 contrast on the pattern (script.js also caps how bright the pattern gets near text).
 const THEMES = [
   { id: 'ink',      label: 'Ink (default)',       accent: '#ff6a3d', mode: 0 },
-  { id: 'brooklyn', label: 'Brooklyn · checker',  accent: '#f2452e', mode: 1 },
-  { id: 'seoul',    label: 'Seoul · waves',       accent: '#f59a2b', mode: 2 },
-  { id: 'moscow',   label: 'Moscow · brush',      accent: '#a76dff', mode: 3 },
-  { id: 'milan',    label: 'Milan · fans',        accent: '#52b9f7', mode: 4 },
-  { id: 'osaka',    label: 'Osaka · squiggles',   accent: '#45c873', mode: 5 }
+  { id: 'brooklyn', label: 'Brooklyn · checker',  accent: '#f2452e', text: '#ffa391', mode: 1 },
+  { id: 'seoul',    label: 'Seoul · waves',       accent: '#f59a2b', text: '#ffb35c', mode: 2 },
+  { id: 'moscow',   label: 'Moscow · brush',      accent: '#a76dff', text: '#cdb0ff', mode: 3 },
+  { id: 'milan',    label: 'Milan · fans',        accent: '#52b9f7', text: '#84ccff', mode: 4 },
+  { id: 'osaka',    label: 'Osaka · squiggles',   accent: '#45c873', text: '#6fe09a', mode: 5 }
 ];

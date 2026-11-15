@@ -415,11 +415,11 @@
   }
   addEventListener('pointerdown', e => { if (e.target.closest('a,button,label,input')) return;
     rip.x = e.clientX / innerWidth * 2 - 1; rip.y = -(e.clientY / innerHeight * 2 - 1); rip.age = 0; });
-  let time = 0, mx = .3, my = .1, vel = 0, hov = 0;
+  let time = 0, mx = .3, my = .1, vel = 0, hov = 0, near = 1, nearT = 1, tickN = 0;
   function drawInk(dt, live) {
     if (live) { time += dt; rip.age += dt; mx += (P.nx - mx) * .06; my += (P.ny - my) * .06; vel += (Math.min(P.v / 40, 1) - vel) * .05; P.v *= .9; hov += ((hovering ? 1 : 0) - hov) * .1; }
     else { rip.age = 9; mx = P.nx; my = P.ny; vel = 0; hov = 0; }
-    gl.uniform1f(U.uTime, time); gl.uniform1f(U.uVel, vel); gl.uniform1f(U.uScroll, scrollP); gl.uniform1f(U.uHas, hov);
+    gl.uniform1f(U.uTime, time); gl.uniform1f(U.uVel, vel); gl.uniform1f(U.uScroll, scrollP); gl.uniform1f(U.uHas, hov); gl.uniform1f(U.uNear, near);
     gl.uniform2f(U.uRes, cv.width, cv.height); gl.uniform2f(U.uMouse, mx, my);
     gl.uniform3f(U.uRip, rip.x, rip.y, rip.age);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -430,17 +430,46 @@
   const themeEl = $('#themes');
   themeEl.innerHTML = THEMES.map(t => `<button type="button" class="tsw tsw--${t.id}" data-theme="${t.id}" aria-pressed="false" aria-label="${esc(t.label)} theme" title="${esc(t.label)}" data-label="${esc(t.id)}" style="--c:${t.accent}"></button>`).join('');
   let theme = THEMES.find(t => t.id === store.get('yusra-theme')) || THEMES[0];
+  // Readability: how strongly may the pattern show an accent colour and still stay under a given
+  // background luminance? (WCAG relative luminance of the dark field mixed with the accent.)
+  const lin = c => c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+  const FIELD = [.047 * .75, .051 * .75, .059 * .75];
+  const kFor = (acc, maxL) => { let lo = 0, hi = 1;
+    for (let i = 0; i < 24; i++) { const k = (lo + hi) / 2, [r, g, b] = FIELD.map((v, j) => v + (acc[j] - v) * k);
+      if (.2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b) > maxL) hi = k; else lo = k; }
+    return lo; };
+  // Is there text (or a control or image) at this point of the page?
+  function textAt(x, y) {
+    const el = document.elementFromPoint(x, y); if (!el || el === cv || el === document.body || el === root) return false;
+    if (el.matches('a,button,input,label,img,iframe,h1,h2,h3,p,li,b,code,small,kbd,figcaption')) return true;
+    for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) return true;
+    return false;
+  }
+  // 1 = text within the pointer's reach (keep the pattern calm), 0 = open space (it may light up fully).
+  function textNearPointer() {
+    if (!hovering) return 1;
+    if (textAt(P.x, P.y)) return 1;
+    const R = innerHeight * .32;
+    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6, c = Math.cos(a), s = Math.sin(a);
+      if (textAt(P.x + c * R * .5, P.y + s * R * .5) || textAt(P.x + c * R, P.y + s * R)) return 1; }
+    return 0;
+  }
   function applyTheme(t, origin) {
     theme = t;
-    if (t.mode) { root.dataset.theme = t.id; root.style.setProperty('--accent', t.accent); }
-    else { delete root.dataset.theme; root.style.removeProperty('--accent'); }           // default: back to the CSS value
+    if (t.mode) {
+      root.dataset.theme = t.id; root.style.setProperty('--accent', t.accent);
+      root.style.setProperty('--accent-text', t.text); root.style.setProperty('--sub', '#c6c4bc');   // lighter text colours: 4.5:1 on the pattern
+    } else { delete root.dataset.theme; ['--accent', '--accent-text', '--sub'].forEach(p => root.style.removeProperty(p)); }   // default: back to the CSS values
     $$('.tsw', themeEl).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === t.id)));
     $('#themename').textContent = t.id;
     if (glOK) {
       const c = parseInt(t.accent.slice(1), 16);
       gl.uniform1f(U.uMode, t.mode);
-      if (t.mode) gl.uniform3f(U.uC, (c >> 16) / 255, (c >> 8 & 255) / 255, (c & 255) / 255);
+      const rgb = [(c >> 16) / 255, (c >> 8 & 255) / 255, (c & 255) / 255];
+      if (t.mode) gl.uniform3f(U.uC, rgb[0], rgb[1], rgb[2]);
       else gl.uniform3f(U.uC, 1., .416, .239);                                             // exact original ink accent
+      // Brightness budget for this accent: at rest, lit with text nearby, lit with none (see theme() in shader.js).
+      gl.uniform3f(U.uK, kFor(rgb, .04), kFor(rgb, .062), 1.);
     }
     store.set('yusra-theme', t.id); dirty = true;
     if (origin) pulse(origin);
@@ -473,6 +502,8 @@
       cx += (P.x - cx) * .25; cy += (P.y - cy) * .25; cur.style.transform = `translate3d(${cx}px,${cy}px,0)`;
       if (flags.x_ray && xtip.classList.contains('is-on')) placeTip(P.x + 16, P.y + 18);
     }
+    if (theme.mode && live && ++tickN % 5 === 0) nearT = textNearPointer();   // themes only; a few hit tests every 5th frame
+    near += (nearT - near) * .15;
     if (glOK && !document.hidden && (live || dirty)) { drawInk(dt, live); dirty = false; }
     requestAnimationFrame(tick);
   }

@@ -15,7 +15,7 @@
    ===================================================================== */
 const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
 const FS = `precision highp float;
-  uniform float uTime, uVel, uScroll, uMode, uHas; uniform vec2 uRes, uMouse; uniform vec3 uA, uB, uC, uRip;
+  uniform float uTime, uVel, uScroll, uMode, uHas, uNear; uniform vec2 uRes, uMouse; uniform vec3 uA, uB, uC, uRip, uK;
   float h(vec2 p){ vec3 q = fract(vec3(p.xyx) * .1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
   float n(vec2 p){ vec2 i = floor(p), f = fract(p), u = f * f * (3. - 2. * f);
     return mix(mix(h(i), h(i + vec2(1., 0.)), u.x), mix(h(i + vec2(0., 1.)), h(i + vec2(1., 1.)), u.x), u.y); }
@@ -135,8 +135,9 @@ const FS = `precision highp float;
     else if (uMode < 3.5) r = moscow(P, M, R, ra, px);
     else if (uMode < 4.5) r = milan(P, M, R, ra, px);
     else r = osaka(P, M, R, ra, px);
-    float spot = smoothstep(1., 0., length(p - m)) * uHas;
-    float k = mix(mix(.32, .26, uHas), 1., clamp(max(r.y, spot * .45), 0., 1.));   // calm at rest, full colour where it reacts
+    // Brightness budget (uK, worked out in script.js from each accent's luminance so text keeps its contrast):
+    // x = at rest, y = the most a reacting area may light up when text is near the pointer, z = when none is.
+    float k = mix(uK.x, mix(uK.z, uK.y, uNear), clamp(r.y, 0., 1.));
     return mix(uA * .75, uC, r.x * k);
   }
 
@@ -174,7 +175,7 @@ function inkInit(gl, U) {
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  ['uTime', 'uVel', 'uScroll', 'uMode', 'uHas', 'uRes', 'uMouse', 'uA', 'uB', 'uC', 'uRip'].forEach(k => U[k] = gl.getUniformLocation(pr, k));
+  ['uTime', 'uVel', 'uScroll', 'uMode', 'uHas', 'uNear', 'uK', 'uRes', 'uMouse', 'uA', 'uB', 'uC', 'uRip'].forEach(k => U[k] = gl.getUniformLocation(pr, k));
   gl.uniform1f(U.uMode, 0.);   // 0 = ink (default); script.js switches it when a theme is picked
   gl.uniform3f(U.uA, .047, .051, .059);
   gl.uniform3f(U.uB, .115, .125, .155);
