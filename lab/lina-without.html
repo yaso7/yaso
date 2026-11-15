@@ -194,7 +194,8 @@ body[data-mode=grid] .prog{opacity:0}
 "use strict";
 
 /* ============================== DATA ============================== */
-// Placeholder images from picsum.photos (seeded so they stay stable). Swap url() for real files later.
+// Placeholder images: public-domain / CC0 photos of Beirut and Lebanon (credits in img/lab/CREDITS.md).
+// Swap the files in img/lab/lina/without/ for real ones later (same names, same aspect ratios).
 const PROJECTS = [
   { t: "Corniche, 6 a.m.", p: "Ain el-Mreisseh", y: 2025, n: 7 },
   { t: "Generator Hours",  p: "Hamra",           y: 2024, n: 6 },
@@ -211,16 +212,16 @@ const PROJECTS = [
 ];
 const SHAPES = [[4,5],[3,2],[4,5],[1,1],[3,2],[2,3],[3,2],[4,5],[2,3],[3,2],[4,5],[5,4]];
 const OFFS   = [-5, 7, -1, 9, -7, 3, 8, -4, 5, -8, 2, 6]; // vertical rhythm in vh
-const url = (seed, a, b, w) => `https://picsum.photos/seed/${seed}/${w}/${Math.round(w * b / a)}`;
+const url = (i, k) => `../img/lab/lina/without/p${String(i + 1).padStart(2, '0')}-${k}.jpg`;
 
 PROJECTS.forEach((p, i) => {
   const [a, b] = SHAPES[i];
   p.ar = a / b;
-  p.cover = url(`lina-haddad-${i + 1}`, a, b, 1400);
+  p.cover = url(i, 0);
   p.imgs = [{ src: p.cover, ar: p.ar }];
   for (let k = 1; k < p.n; k++) {
     const [c, d] = SHAPES[(i * 3 + k * 5) % SHAPES.length];
-    p.imgs.push({ src: url(`lina-haddad-${i + 1}-${k}`, c, d, 1600), ar: c / d });
+    p.imgs.push({ src: url(i, k), ar: c / d });
   }
 });
 

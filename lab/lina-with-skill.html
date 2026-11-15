@@ -7,8 +7,6 @@
 <meta name="description" content="Street photographs from Beirut by Lina Haddad. Twelve rolls, 2022–2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://picsum.photos">
-<link rel="preconnect" href="https://fastly.picsum.photos" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gloock&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400&family=Schibsted+Grotesk:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ---------- reset ---------- */
@@ -340,8 +338,8 @@ html.is-touch .vf,html.is-touch .preview{display:none}
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"}}</script>
 <script type="module">
 /* ============================================================
-   Data — 12 rolls × 6 frames. Placeholder photos from picsum,
-   seeded so each roll always shows the same pictures.
+   Data — 12 rolls × 6 frames. Placeholder photos: public-domain / CC0
+   images of Beirut and Lebanon (credits in img/lab/CREDITS.md).
    o = orientation of each frame (L landscape / P portrait).
    ============================================================ */
 const ROLLS = [
@@ -360,9 +358,10 @@ const ROLLS = [
 ];
 const N = ROLLS.length, FR = 6;
 const p2 = n => String(n).padStart(2, '0');
-const pic = (r, k, w, h) => `https://picsum.photos/seed/lina-haddad-${p2(r + 1)}-${k}/${w}/${h}`;
-const photoURL = (r, k) => ROLLS[r].o[k] === 'L' ? pic(r, k, 1800, 1200) : pic(r, k, 1200, 1800);
-const coverURL = (r, w = 900) => pic(r, 0, w, Math.round(w / 1.5));
+const IMG = '../img/lab/lina/with/';                                   // local files, see img/lab/CREDITS.md
+const photoURL = (r, k) => `${IMG}r${p2(r + 1)}-${k}.jpg`;                  // full frame (3:2 or 2:3)
+const thumbURL = (r, k) => `${IMG}r${p2(r + 1)}-${k}-t.jpg`;                // 240x160 contact-sheet thumb
+const coverURL = (r, w = 900) => w <= 240 ? thumbURL(r, 0) : `${IMG}r${p2(r + 1)}-0-c.jpg`; // 900x600 cover
 
 const root = document.documentElement;
 const $ = (s, c = document) => c.querySelector(s);
@@ -610,7 +609,7 @@ function fillRoll(i, animate) {
   for (let k = 0; k < FR; k++) {
     const b = document.createElement('button');
     b.setAttribute('aria-label', `Frame ${k + 1}`); b.dataset.k = k; b.dataset.cursor = p2(k + 1);
-    b.innerHTML = `<img src="${pic(i, k, 160, 107)}" alt="" crossorigin="anonymous">`;
+    b.innerHTML = `<img src="${thumbURL(i, k)}" alt="" crossorigin="anonymous">`;
     thumbs.append(b);
   }
   const nx = (i + 1) % N;
