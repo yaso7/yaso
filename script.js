@@ -178,6 +178,7 @@
   }
   function measure() { chars.forEach(c => { const r = c.el.getBoundingClientRect(); c.cx = r.left + r.width / 2; c.cy = r.top + r.height / 2 + scrollY; }); }
   document.fonts?.ready?.then(measure);
+  document.fonts?.addEventListener?.('loadingdone', measure); // stylesheet may arrive after 'ready'
 
   /* ---------- the verb: click to see what else I do ---------- */
   let vi = 0, verbClicks = 0;
