@@ -7,5 +7,5 @@ photo-3.jpg         - your thesis demo running
 thesis-demo.jpg     - shown when the v7.0 thesis release is opened
 holooltech-game.jpg - one of your own game screenshots, shown in v1.0 (only if you are allowed to share it)
 
-Any file that is missing is simply skipped. Captions are set in PHOTOS at the top of the script in index.html.
+Any file that is missing is simply skipped. Captions are set in PHOTOS in data.js.
 No ISUZU or SawafTECH screenshots (NDA).
