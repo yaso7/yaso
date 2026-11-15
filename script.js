@@ -11,13 +11,15 @@
   const moving = () => flags.motion && !reduce;
 
   /* ---------- photos ---------- */
-  function loadPhoto(fig, src) {
+  function loadPhoto(fig, src, fallback) {
     const img = $('img', fig); if (!img || !src) { fig.classList.add('empty'); return; }
-    img.onerror = () => fig.classList.add('empty');
+    // optional fallback: if the first file is missing, try the second (and mark the figure so CSS can adapt)
+    img.onerror = () => { if (fallback && img.getAttribute('src') !== fallback) { fig.classList.add('is-fallback'); img.src = fallback; } else fig.classList.add('empty'); };
     img.onload = () => fig.classList.remove('empty');
     img.src = src;
   }
   $$('[data-photo="portrait"]').forEach(f => loadPhoto(f, PHOTOS.portrait));
+  $$('[data-photo="avatar"]').forEach(f => loadPhoto(f, PHOTOS.avatar, PHOTOS.portrait));
   (function strip() {
     const el = $('#strip'); let shown = 0;
     PHOTOS.strip.forEach(p => {

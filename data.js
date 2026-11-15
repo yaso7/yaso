@@ -6,6 +6,9 @@
 // (the portrait falls back to a YM monogram). Never use NDA client screenshots here.
 const PHOTOS = {
   portrait: 'img/portrait.jpg',
+  // Small round photo next to your email. Save your LinkedIn picture as img/avatar.jpg;
+  // until that file exists the portrait is used instead.
+  avatar: 'img/avatar.jpg',
   strip: [
     { src: 'img/photo-1.jpg', cap: 'WRO Syria · running the event' },
     { src: 'img/photo-2.jpg', cap: 'Where things ship' },
