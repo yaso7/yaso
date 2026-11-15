@@ -270,10 +270,12 @@
     step = n;
     panes.forEach(p => { const on = +p.dataset.pane === n; p.hidden = !on; if (on) { p.classList.toggle('back', dir < 0); p.style.animation = 'none'; void p.offsetWidth; p.style.animation = ''; } });
     const merged = n === 3 && wasSent;
-    stepLis.forEach((li, i) => { li.classList.toggle('done', i + 1 < n || merged); li.classList.toggle('cur', i + 1 === n && !merged); });
+    stepLis.forEach((li, i) => { li.classList.toggle('done', i + 1 < n || merged); li.classList.toggle('cur', i + 1 === n && !merged);
+      if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     stepLis[2].textContent = n === 3 && !wasSent ? '03 · Send by email' : '03 · Merged';
     const first = $(`.pane[data-pane="${n}"] input, .pane[data-pane="${n}"] button`, flow);
     if (n === 2) setTimeout(() => $('#reqemail').focus({ preventScroll: true }), 60);
+    else if (n === 3) $('#donebox').focus({ preventScroll: true }); // read the result first, not a button
     else if (first) first.focus({ preventScroll: true });
   }
   function updatePick() {
@@ -294,13 +296,13 @@
   });
   $('[data-back]', flow).addEventListener('click', () => go(1, -1));
   const emailOK = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-  $('#reqemail').addEventListener('input', () => { $('#emailfield').classList.remove('bad'); $('#reqerr').textContent = ''; });
+  $('#reqemail').addEventListener('input', () => { $('#emailfield').classList.remove('bad'); $('#reqemail').removeAttribute('aria-invalid'); $('#reqerr').textContent = ''; });
   flow.addEventListener('submit', async e => {
     e.preventDefault();
     if (step === 1) { $('[data-next]', flow).click(); return; }
     if (step !== 2) return;
     const email = $('#reqemail').value.trim();
-    if (!emailOK(email)) { $('#emailfield').classList.add('bad'); $('#reqerr').textContent = 'That doesn\'t look like an email address yet.'; $('#reqemail').focus(); return; }
+    if (!emailOK(email)) { $('#emailfield').classList.add('bad'); $('#reqemail').setAttribute('aria-invalid', 'true'); $('#reqerr').textContent = 'That doesn\'t look like an email address yet.'; $('#reqemail').focus(); return; }
     const needs = picked();
     const send = $('#send'); send.disabled = true; send.textContent = 'Sending…';
     let sent = false;

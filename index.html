@@ -218,7 +218,7 @@
         </div>
 
         <form class="flow" id="flow" novalidate hidden aria-label="Project request">
-          <ol class="flow-steps" id="flowsteps"><li>01 · Scope</li><li>02 · Reply-to</li><li>03 · Merged</li></ol>
+          <ol class="flow-steps" id="flowsteps" aria-label="Request steps"><li>01 · Scope</li><li>02 · Reply-to</li><li>03 · Merged</li></ol>
 
           <fieldset class="pane" data-pane="1">
             <legend>What do you need help with?</legend>
@@ -245,7 +245,7 @@
           </fieldset>
 
           <div class="pane" data-pane="3" hidden aria-live="polite">
-            <div id="donebox"></div>
+            <div id="donebox" tabindex="-1"></div>
             <div class="flow-row" style="justify-content:flex-start"><button type="button" class="btn" data-reset data-label="Again">Start another request</button></div>
           </div>
         </form>
