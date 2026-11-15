@@ -206,6 +206,12 @@
     P.nx = e.clientX / innerWidth * 2 - 1; P.ny = -(e.clientY / innerHeight * 2 - 1);
   }, { passive: true });
   document.addEventListener('pointerleave', () => { P.has = false; });
+  // "hovering" drives the themes' hover effects: on while a pointer is over the page, off when the
+  // mouse leaves or a finger lifts (so a phone doesn't keep a hover spot where you last touched).
+  let hovering = false;
+  addEventListener('pointermove', () => { hovering = true; }, { passive: true });
+  document.addEventListener('pointerleave', () => { hovering = false; });
+  ['pointerup', 'pointercancel'].forEach(ev => addEventListener(ev, e => { if (e.pointerType !== 'mouse') hovering = false; }, { passive: true }));
 
   /* ---------- flags ---------- */
   const flags = { hero_variant: false, x_ray: false, dense_mode: false, motion: !reduce, dark_launch: false };
@@ -409,11 +415,11 @@
   }
   addEventListener('pointerdown', e => { if (e.target.closest('a,button,label,input')) return;
     rip.x = e.clientX / innerWidth * 2 - 1; rip.y = -(e.clientY / innerHeight * 2 - 1); rip.age = 0; });
-  let time = 0, mx = .3, my = .1, vel = 0;
+  let time = 0, mx = .3, my = .1, vel = 0, hov = 0;
   function drawInk(dt, live) {
-    if (live) { time += dt; rip.age += dt; mx += (P.nx - mx) * .06; my += (P.ny - my) * .06; vel += (Math.min(P.v / 40, 1) - vel) * .05; P.v *= .9; }
-    else { rip.age = 9; mx = P.nx; my = P.ny; vel = 0; }
-    gl.uniform1f(U.uTime, time); gl.uniform1f(U.uVel, vel); gl.uniform1f(U.uScroll, scrollP);
+    if (live) { time += dt; rip.age += dt; mx += (P.nx - mx) * .06; my += (P.ny - my) * .06; vel += (Math.min(P.v / 40, 1) - vel) * .05; P.v *= .9; hov += ((hovering ? 1 : 0) - hov) * .1; }
+    else { rip.age = 9; mx = P.nx; my = P.ny; vel = 0; hov = 0; }
+    gl.uniform1f(U.uTime, time); gl.uniform1f(U.uVel, vel); gl.uniform1f(U.uScroll, scrollP); gl.uniform1f(U.uHas, hov);
     gl.uniform2f(U.uRes, cv.width, cv.height); gl.uniform2f(U.uMouse, mx, my);
     gl.uniform3f(U.uRip, rip.x, rip.y, rip.age);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
