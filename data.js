@@ -47,7 +47,11 @@ const RELEASES = [
 /* ---------- experience: by company ---------- */
 const COMPANIES = [
   { id:'rightware', org:'Rightware LLC', role:'Front-End Engineer', start:'2026-08', end:null, kind:'full', type:'Full-time', place:'Syria',
-    notes:['Front-end engineering on the company\'s products (current role).'] },
+    notes:[
+      'Migrating Flutter web sites to Next.js and Vue.js.',
+      'Improving existing dashboards: visual style, UI and the day-to-day user experience.',
+      'Collecting feedback from dashboard users and studying how they work in our systems, then making those tasks faster and easier to manage.',
+      'Building and designing all of the company\'s landing pages.'] },
   { id:'self', org:'Independent', role:'Full-Stack Consultant', start:'2022-01', end:null, kind:'split', splitAt:'2025-09', type:'Direct clients', place:'Remote',
     notes:['Alongside agency and contract roles until August 2025; full-time since September 2025.','Two production Next.js 14 apps; dashboard API cut from 1.2 s to 350 ms.','Earlier client work: React, Laravel, Stripe and WordPress builds for shops, agencies and a non-profit.'], rel:'v5.0' },
   { id:'sawaf', org:'SawafTECH', role:'Full-Stack Web Developer (solo contractor)', start:'2025-01', end:'2025-08', kind:'full', type:'Full-time contract', place:'Remote',
