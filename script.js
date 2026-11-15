@@ -442,6 +442,11 @@
   themeEl.addEventListener('click', e => { const b = e.target.closest('.tsw'); if (b) applyTheme(THEMES.find(t => t.id === b.dataset.theme), b); });
   applyTheme(theme);
 
+  // If the browser drops the WebGL context, hide the canvas (the dark page shows through) instead of
+  // leaving a blank one behind light text; rebuild the shader when the context comes back.
+  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); glOK = false; cv.style.visibility = 'hidden'; });
+  cv.addEventListener('webglcontextrestored', () => { glOK = inkInit(gl, U); if (glOK) { cv.style.visibility = ''; sizeGL(); applyTheme(theme); } });
+
   /* ---------- ticker ---------- */
   let last = performance.now();
   function tick(now) {
