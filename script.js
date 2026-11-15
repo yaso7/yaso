@@ -392,9 +392,10 @@
   let gl = null, U = {}, glOK = false, dirty = true;
   try { gl = cv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' }); } catch {}
   glOK = inkInit(gl, U);
+  let qual = 1, slow = 0; // adaptive resolution: only lowers on devices that stay under ~20 fps
   function sizeGL() {
     if (!glOK) return;
-    const s = Math.min(devicePixelRatio || 1, 1.5) * .75;
+    const s = Math.min(devicePixelRatio || 1, 1.5) * .75 * qual;
     cv.width = Math.round(innerWidth * s); cv.height = Math.round(innerHeight * s);
     gl.viewport(0, 0, cv.width, cv.height); dirty = true;
   }
@@ -419,8 +420,12 @@
   /* ---------- ticker ---------- */
   let last = performance.now();
   function tick(now) {
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const raw = now - last, dt = Math.min(.05, raw / 1000); last = now;
     const live = moving();
+    if (glOK && live && !document.hidden) {
+      slow = raw > 50 ? slow + 1 : Math.max(0, slow - 1);
+      if (slow > 45 && qual > .5) { qual = Math.max(.5, qual - .15); slow = 0; sizeGL(); }
+    }
     for (const c of chars) {
       let target = 62;
       if (live && P.has) { const d = Math.hypot(c.cx - P.x, (c.cy - scrollY) - P.y); if (d < 220) target = 62 + (1 - d / 220) * 40; }
