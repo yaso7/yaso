@@ -80,3 +80,14 @@ const LAB = [
 const VARIANTS = { A: ['Yusra', 'Malas'], B: ['From idea', 'to shipped', 'product.'] };
 const VERBS = ['ships', 'builds', 'develops', 'designs', 'maintains', 'improves', 'scales', 'tests', 'launches'];
 const NEEDS = ['Consulting', 'Full-stack development', 'AI integration & agents', 'Front-end & UI', '3D / WebGL / AR', 'Performance & maintenance', 'Something else'];
+
+/* ---------- themes: accent colour + background pattern (picked in the flags menu) ---------- */
+// The first one is the default. mode = which pattern shader.js draws (0 = the original ink field).
+const THEMES = [
+  { id: 'ink',      label: 'Ink (default)',       accent: '#ff6a3d', mode: 0 },
+  { id: 'brooklyn', label: 'Brooklyn · checker',  accent: '#f2452e', mode: 1 },
+  { id: 'seoul',    label: 'Seoul · waves',       accent: '#f59a2b', mode: 2 },
+  { id: 'moscow',   label: 'Moscow · brush',      accent: '#a76dff', mode: 3 },
+  { id: 'milan',    label: 'Milan · fans',        accent: '#52b9f7', mode: 4 },
+  { id: 'osaka',    label: 'Osaka · squiggles',   accent: '#45c873', mode: 5 }
+];

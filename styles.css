@@ -64,6 +64,20 @@ html.no-motion *,html.no-motion *::before,html.no-motion *::after{transition-dur
 .flags-panel header{display:flex;justify-content:space-between;padding:6px 12px 8px;border-bottom:1px solid var(--line)}
 .flag{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;width:100%;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);transition:background-color .2s}
 .flag:last-child{border-bottom:0}
+/* theme picker: one swatch per THEMES entry (data.js), each a tiny CSS sketch of its pattern */
+.flag--theme{text-transform:none;letter-spacing:0}
+.flag--theme:hover{background:none}
+.tname{grid-row:1/3;grid-column:2;font:500 10px/1 var(--ff-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.themes{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;padding-top:6px}
+.tsw{width:30px;height:30px;border:1px solid var(--line);background:#0b0b0c;cursor:pointer;transition:transform .2s var(--ease-out)}
+.tsw:hover{transform:translateY(-2px)}
+.tsw[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.tsw--ink{background:repeating-radial-gradient(circle at 15% 85%,transparent 0 4px,var(--c) 4px 5px),#14161a}
+.tsw--brooklyn{background:conic-gradient(var(--c) 25%,#0b0b0c 0 50%,var(--c) 0 75%,#0b0b0c 0) 0 0/10px 10px}
+.tsw--seoul{background:repeating-radial-gradient(circle at 0 100%,var(--c) 0 3px,#0b0b0c 3px 6px)}
+.tsw--moscow{background:repeating-linear-gradient(-60deg,var(--c) 0 5px,#0b0b0c 5px 6px,var(--c) 6px 8px,#0b0b0c 8px 10px)}
+.tsw--milan{background:radial-gradient(circle at 50% 100%,#0b0b0c 0 5px,var(--c) 5px 6.5px,transparent 6.5px) 0 0/15px 8px,#0b0b0c}
+.tsw--osaka{background:radial-gradient(circle at 0 0,transparent 4px,var(--c) 4px 6px,transparent 6px) 0 0/15px 15px,radial-gradient(circle at 100% 100%,transparent 4px,var(--c) 4px 6px,transparent 6px) 0 0/15px 15px,#0b0b0c}
 .flag:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
 .flag code{font:500 11.5px/1.2 var(--ff-mono)}
 .flag small{grid-column:1;font:400 10px/1.3 var(--ff-mono);color:var(--sub)}

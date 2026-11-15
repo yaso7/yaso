@@ -373,6 +373,7 @@
     else if (k === 'b') setFlag('hero_variant', true, flagBtn);
     else if (k === 'd') setFlag('dense_mode', undefined, flagBtn);
     else if (k === 'm') setFlag('motion', undefined, flagBtn);
+    else if (k === 't') applyTheme(THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length], flagBtn);
   });
 
   /* ---------- cursor ---------- */
@@ -418,6 +419,28 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   addEventListener('resize', () => { sizeGL(); measure(); });
+
+  /* ---------- theme: accent colour + background pattern (THEMES in data.js) ---------- */
+  const themeEl = $('#themes');
+  themeEl.innerHTML = THEMES.map(t => `<button type="button" class="tsw tsw--${t.id}" data-theme="${t.id}" aria-pressed="false" aria-label="${esc(t.label)} theme" title="${esc(t.label)}" data-label="${esc(t.id)}" style="--c:${t.accent}"></button>`).join('');
+  let theme = THEMES.find(t => t.id === store.get('yusra-theme')) || THEMES[0];
+  function applyTheme(t, origin) {
+    theme = t;
+    if (t.mode) { root.dataset.theme = t.id; root.style.setProperty('--accent', t.accent); }
+    else { delete root.dataset.theme; root.style.removeProperty('--accent'); }           // default: back to the CSS value
+    $$('.tsw', themeEl).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === t.id)));
+    $('#themename').textContent = t.id;
+    if (glOK) {
+      const c = parseInt(t.accent.slice(1), 16);
+      gl.uniform1f(U.uMode, t.mode);
+      if (t.mode) gl.uniform3f(U.uC, (c >> 16) / 255, (c >> 8 & 255) / 255, (c & 255) / 255);
+      else gl.uniform3f(U.uC, 1., .416, .239);                                             // exact original ink accent
+    }
+    store.set('yusra-theme', t.id); dirty = true;
+    if (origin) pulse(origin);
+  }
+  themeEl.addEventListener('click', e => { const b = e.target.closest('.tsw'); if (b) applyTheme(THEMES.find(t => t.id === b.dataset.theme), b); });
+  applyTheme(theme);
 
   /* ---------- ticker ---------- */
   let last = performance.now();
