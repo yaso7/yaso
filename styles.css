@@ -38,7 +38,9 @@ html.no-motion *,html.no-motion *::before,html.no-motion *::after{transition-dur
 .frame{position:fixed;z-index:4;pointer-events:none;border:1px solid var(--line);
   top:calc(var(--pad) + env(safe-area-inset-top,0px));bottom:calc(var(--pad) + env(safe-area-inset-bottom,0px));
   left:max(var(--pad),env(safe-area-inset-left,0px));right:max(var(--pad),env(safe-area-inset-right,0px))}
-.hud{position:fixed;z-index:6;display:flex;gap:14px;align-items:center;font:400 10.5px/1 var(--ff-mono);letter-spacing:.07em;text-transform:uppercase}
+.hud{position:fixed;z-index:6;pointer-events:none;display:flex;gap:14px;align-items:center;font:400 10.5px/1 var(--ff-mono);letter-spacing:.07em;text-transform:uppercase}
+/* the floating pills only catch clicks on their links and buttons, not their padding or the gaps between links */
+.hud a,.hud button{pointer-events:auto}
 .hud--tl{top:calc(var(--pad) + env(safe-area-inset-top,0px) + 14px);left:calc(max(var(--pad),env(safe-area-inset-left,0px)) + 16px)}
 .hud--tr{top:calc(var(--pad) + env(safe-area-inset-top,0px) + 14px);right:calc(max(var(--pad),env(safe-area-inset-right,0px)) + 16px)}
 .hud--bl{bottom:calc(var(--pad) + env(safe-area-inset-bottom,0px) + 12px);left:calc(max(var(--pad),env(safe-area-inset-left,0px)) + 12px);align-items:flex-end}
